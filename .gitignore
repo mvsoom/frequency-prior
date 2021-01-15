@@ -1,0 +1,5 @@
+paper/
+old/
+.Rhistory
+*.ipynb
+*.pdf
