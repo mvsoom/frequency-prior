@@ -19,8 +19,8 @@ d[, `:=`(r = log(x/c), s = log(y/x), t = log(z/y))]
 
 ggMarginal(
   ggplot(d, aes(r, s, color=main)) +
-    geom_vline(xintercept = mean(d3$r)) +
-    geom_hline(yintercept = mean(d3$s)) +
+    geom_vline(xintercept = mean(d$r)) +
+    geom_hline(yintercept = mean(d$s)) +
     geom_point() +
     geom_density2d()
   , type="histogram"
