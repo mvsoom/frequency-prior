@@ -1,0 +1,36 @@
+def get_data():
+    import arctic
+    
+    marks = """
+    Time_s
+    0.521712220149
+    0.529017772074
+    0.536285752548
+    0.543491841004
+    """
+
+    fs0, fs, ts, ds, _ = arctic.load_arctic_file('bdl/arctic_a0017.wav', marks, 8000)
+
+    ts = [t/fs for t in ts] # Give units [sec]
+
+    data = (ts, ds)
+    return data
+
+def get_PQ_grid():
+    import itertools
+
+    Ps = np.arange(0,11)
+    Qs = (1,2,3,4)
+
+    return list(itertools.product(Ps, Qs))
+
+def get_hyperparameters():
+    bounds = {
+        'b': [(40., 40., 60., 60.), (180., 250., 420., 420.)],
+        'f': [(300., 1000., 2000., 2500.), (900., 2000., 3000., 4000.)]
+    }
+
+    x0 = 300. # Based on bounds variable just defined
+    Ex = array([600.,1700.,2500.,3800.]) # Roughly base on Vallee (1994)
+    F = [x0, *Ex]
+    return bounds, F
