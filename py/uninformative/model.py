@@ -13,7 +13,7 @@ import joblib
 memory = joblib.Memory('cache', verbose=1)
 
 @memory.cache
-def run_nested(new, order, data, hyper, delta=1.):
+def run_nested(new, order, data, hyper, delta=1., runid=0):
     P, Q = order
     ndim = 2*Q
     
@@ -31,6 +31,7 @@ def run_nested(new, order, data, hyper, delta=1.):
     
     res = sampler.results
     res['walltime'] = end - start
+    res['runid'] = runid
     return res
 
 def ptform_old(q, order, hyper):
