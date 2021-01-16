@@ -23,6 +23,12 @@
 # - Note that the prior bounds for $F$ have very little overlap: kind of like cheating.
 #
 # - Current thoughts: new priors are indeed *very* uninformative (also have less bounds to set), so higher $H$ and longer runtimes compared to prior with very definite, hardly overlapping bounds.
+#
+# - After running, find the "true value" of the bandwidths $B$. Then set these to fixed values so we can compare differences in the prior of frequencies only.
+#
+# - Try wider bounds with actual overlap to see what the effect is.
+#
+# - We could compare our prior to a range of nested sampling runs with lognormals as priors with different relative uncertainty $\rho$ and then see to roughly which value of $\rho$ our prior corresponds by comparing the information (i.e. similar information as our prior for $\rho = \rho^*$ $\rightarrow$ our prior is like $\rho^*\%$ uncertainty).
 
 # +
 # %pylab inline
