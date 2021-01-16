@@ -59,5 +59,22 @@ J = 4
 x0 = 450
 Ex = (800, 2000, 2500, 4000)
 
-samples = vstack([sample_x_ppf(J, x0, Ex, q = rand(J)) for _ in range(10000)])
+F = [x0, *Ex]
+
+samples = vstack([sample_x_ppf(rand(J), J, F) for _ in range(10000)])
 mean(samples,axis=0)
+# -
+
+# ## Testing PPF Jeffreys sampler
+
+# +
+from sample_ppf import sample_jeffreys_ppf
+
+bounds = [(300., 1000., 2000., 2500.), (900., 2000., 3000., 4000.)]
+J = 3
+
+samples = vstack([sample_jeffreys_ppf(rand(J), bounds) for _ in range(100000)])
+for x in samples.T:
+    hist(x, bins=B)
+    axvline(mean(x))
+    show()
