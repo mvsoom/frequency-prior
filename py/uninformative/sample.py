@@ -50,24 +50,10 @@ for x in samples:
     axvline(mean(x))
     show()
 
-
 # ## PPF version for use in nested sampling
 
 # +
-def sample_x_ppf(J, x0, Ex, q):
-    # Concatenate hyperparameters
-    F = [x0, *Ex]
-    
-    # Calculate scale parameters for the u ~ Exp(beta) such
-    # that the marginal moments agree with Ex
-    beta = [(F[j+1] - F[j])/F[j+1] for j in range(J)]
-    
-    # Draw the u
-    u = atleast_1d(scipy.stats.expon.ppf(q, scale=beta))
-    
-    # Transform to x
-    x = [x0*exp(sum(u[0:j+1])) for j in range(J)]
-    return array(x)
+from sample_ppf import sample_x_ppf
 
 J = 4
 x0 = 450
