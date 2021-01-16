@@ -1,5 +1,6 @@
 import numpy as np
 import gvar
+import copy
 import dynesty
 from dynesty import plotting as dyplot
 from dynesty import utils as dyfunc
@@ -18,7 +19,7 @@ def parameter_estimates(results, return_gvars=True):
     estimates = gvar.gvar(mean, cov) if return_gvars else mean
     return estimates
 
-def analyze(results, show_runplot=True):
+def analyze(results, ylim_quantiles=(0,.99)):
     estimates = parameter_estimates(results)
     
     print("Log Z =", logz(results))
@@ -27,7 +28,17 @@ def analyze(results, show_runplot=True):
     #print('Full covariance =')
     #pprint(cov)
     
-    if show_runplot: dyplot.runplot(results)
-    p, _ = dyplot.traceplot(results, show_titles=True, verbose=True)
+    dyplot.runplot(results)
+    p, _ = dyplot.traceplot(results, show_titles=True, verbose=True, ylim_quantiles=ylim_quantiles)
     p.tight_layout() # Somehow this still outputs to Jupyter lab
+    
     dyplot.cornerplot(results)
+
+def resample_results(results):
+    samples = results.samples
+    weights = np.exp(results.logwt - results.logz[-1])
+    
+    new = copy.deepcopy(results)
+    new.samples = dyfunc.resample_equal(samples, weights)
+    new.logwt = np.repeat(-np.log(len(weights)), len(weights))
+    return new
