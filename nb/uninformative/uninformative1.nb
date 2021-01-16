@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     41293,       1018]
-NotebookOptionsPosition[     36970,        936]
-NotebookOutlinePosition[     37304,        951]
-CellTagsIndexPosition[     37261,        948]
+NotebookDataLength[     41323,       1019]
+NotebookOptionsPosition[     37000,        937]
+NotebookOutlinePosition[     37333,        952]
+CellTagsIndexPosition[     37290,        949]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -555,14 +555,14 @@ Cell[TextData[{
   FormBox[
    RowBox[{"p", "(", 
     RowBox[{"u", "|", "X"}], ")"}], TraditionalForm]],ExpressionUUID->
-  "cfcaf7af-ebda-4fef-80c8-23c847db6ddc"],
+  "c03076a1-9587-4528-aaec-025e4f9e4937"],
  " where the hyperparameter vector ",
  Cell[BoxData[
   FormBox[
    RowBox[{"X", "=", 
     RowBox[{"(", 
      RowBox[{"c", ",", "mF1", ",", "mF2", ",", "..."}], ")"}]}], 
-   TraditionalForm]],ExpressionUUID->"5de41248-4c22-4180-91f0-3cb22157bd31"],
+   TraditionalForm]],ExpressionUUID->"c0089cd5-fc33-421f-83b4-1e8f8c00be8b"],
  " is zero-indexed (",
  Cell[BoxData[
   FormBox[
@@ -571,7 +571,7 @@ Cell[TextData[{
      SubscriptBox["X", "0"], "=", "c"}], ",", 
     RowBox[{
      SubscriptBox["X", "1"], "=", "mF1"}], ",", "..."}], TraditionalForm]],
-  ExpressionUUID->"a07b2edb-0f15-4136-8073-2c90c7577196"],
+  ExpressionUUID->"b2612497-07a0-42f8-bb8f-56d2ca140dd5"],
  "):\n\t",
  Cell[BoxData[
   FormBox[
@@ -579,12 +579,12 @@ Cell[TextData[{
     SubscriptBox["u", "j"], " ", "~", " ", 
     RowBox[{"Exp", "[", 
      SubscriptBox["\[Beta]", "j"], "]"}]}], TraditionalForm]],ExpressionUUID->
-  "ee2c5a3e-116b-470f-a480-0ec0c7869c89"],
+  "55b3a990-e982-411d-b8f7-07f8f16a775e"],
  "\nHere ",
  Cell[BoxData[
   FormBox[
    SubscriptBox["\[Beta]", "j"], TraditionalForm]],ExpressionUUID->
-  "a39d2ebf-0570-4850-a96f-6b7057016947"],
+  "ff473fe8-cf6a-4e4e-b787-9220023b719d"],
  " is the scale parameter of the exponential (not the rate), and is given by:\
 \n\t",
  Cell[BoxData[
@@ -597,29 +597,30 @@ Cell[TextData[{
       SubscriptBox["X", 
        RowBox[{"j", "-", "1"}]]}], 
      SubscriptBox["X", "j"]]}], TraditionalForm]],ExpressionUUID->
-  "4da36e3b-5782-48b0-8ced-f514c4598356"],
+  "ba1adbee-8d41-4def-8539-50fe0fff9c20"],
  "\nThese expressions derive from combining the ",
  Cell[BoxData[
   FormBox[
    RowBox[{"Exp", "[", 
     RowBox[{"\[Lambda]", ".", "u"}], "]"}], TraditionalForm]],ExpressionUUID->
-  "6a0baece-255d-4de7-bd22-2f3493dadbcf"],
+  "8065ced2-6bd2-4ade-8c04-520d9afb38cd"],
  " together with the invariant measure ",
  Cell[BoxData[
   FormBox[
    RowBox[{"m", "[", "u", "]"}], TraditionalForm]],ExpressionUUID->
-  "2fcd7138-0be6-4442-b226-6f00b88e4d3d"],
+  "e2d81c96-18b5-49a8-bd9f-842b0c703e8f"],
  " and then noting that the joint pdf can be expressed as decoupled ",
  Cell[BoxData[
   FormBox[
    RowBox[{"Exp", "[", 
     SubscriptBox["\[Beta]", "j"], "]"}], TraditionalForm]],ExpressionUUID->
-  "db212dd4-a7cb-4baf-919e-df3808f24c16"],
+  "7ff0cb53-6eaf-41b6-aec6-c2190e248514"],
  " expressions, parametrized by scale instead of rate parameter."
 }], "Text",
  CellChangeTimes->{{3.81975028598578*^9, 3.8197503193007402`*^9}, {
-  3.819750353119761*^9, 3.819750358204636*^9}, {3.8197820670038023`*^9, 
-  3.8197820895971813`*^9}},ExpressionUUID->"e3efc111-5536-4d0e-afc2-\
+   3.819750353119761*^9, 3.819750358204636*^9}, {3.8197820670038023`*^9, 
+   3.8197820895971813`*^9}, 
+   3.8197833105924463`*^9},ExpressionUUID->"e3efc111-5536-4d0e-afc2-\
 c897d7d5d773"]
 }, Open  ]],
 
@@ -934,7 +935,7 @@ sRS9aY69Ur7A3K1/vbWPliLJiKfxh4Wl4YBgsMDSvaXIRu17NFtEGvYbJzwZ
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{1920, 1053},
+WindowSize->{960, 1029},
 WindowMargins->{{0, Automatic}, {0, Automatic}},
 FrontEndVersion->"12.0 for Linux x86 (64-bit) (April 8, 2019)",
 StyleDefinitions->"Default.nb"
@@ -999,24 +1000,24 @@ Cell[16749, 465, 368, 8, 53, "Output",ExpressionUUID->"4a66f451-8216-477a-bd0b-c
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[17166, 479, 318, 6, 68, "Section",ExpressionUUID->"b2e8108e-654d-4d62-8c63-e08ce0fa7e16"],
-Cell[17487, 487, 1019, 21, 60, "Text",ExpressionUUID->"7dbd857a-bdcb-42e4-b1e0-757521727dde"],
+Cell[17487, 487, 1019, 21, 108, "Text",ExpressionUUID->"7dbd857a-bdcb-42e4-b1e0-757521727dde"],
 Cell[18509, 510, 301, 6, 31, "Input",ExpressionUUID->"c0eae677-37be-4633-b3a8-57105b0f96c7"],
 Cell[CellGroupData[{
 Cell[18835, 520, 774, 17, 31, "Input",ExpressionUUID->"293b378a-98ba-4632-8210-4561aa5aa0d2"],
 Cell[19612, 539, 378, 9, 53, "Output",ExpressionUUID->"a515844b-6b21-4cb7-933e-65dd5048299b"]
 }, Open  ]],
-Cell[20005, 551, 2499, 71, 146, "Text",ExpressionUUID->"e3efc111-5536-4d0e-afc2-c897d7d5d773"]
+Cell[20005, 551, 2529, 72, 194, "Text",ExpressionUUID->"e3efc111-5536-4d0e-afc2-c897d7d5d773"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[22541, 627, 150, 3, 68, "Section",ExpressionUUID->"8451efbf-fe84-4cf8-a767-ee86bdefcb63"],
-Cell[22694, 632, 942, 28, 36, "Text",ExpressionUUID->"7277f4f2-1674-46b6-ac16-7f1c6feb3311"],
+Cell[22571, 628, 150, 3, 68, "Section",ExpressionUUID->"8451efbf-fe84-4cf8-a767-ee86bdefcb63"],
+Cell[22724, 633, 942, 28, 60, "Text",ExpressionUUID->"7277f4f2-1674-46b6-ac16-7f1c6feb3311"],
 Cell[CellGroupData[{
-Cell[23661, 664, 604, 16, 31, "Input",ExpressionUUID->"de90a53a-7254-4fe5-a73f-a147e5abea8c"],
-Cell[24268, 682, 384, 9, 55, "Output",ExpressionUUID->"a2e77040-4616-4803-a51e-4154fffc6dee"]
+Cell[23691, 665, 604, 16, 31, "Input",ExpressionUUID->"de90a53a-7254-4fe5-a73f-a147e5abea8c"],
+Cell[24298, 683, 384, 9, 55, "Output",ExpressionUUID->"a2e77040-4616-4803-a51e-4154fffc6dee"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[24689, 696, 503, 9, 31, "Input",ExpressionUUID->"beb24aa1-fac3-4054-90b9-b82c26d1cd8b"],
-Cell[25195, 707, 11735, 224, 228, "Output",ExpressionUUID->"376be4cd-5abe-4a14-8d87-b7cf8a0723db"]
+Cell[24719, 697, 503, 9, 31, "Input",ExpressionUUID->"beb24aa1-fac3-4054-90b9-b82c26d1cd8b"],
+Cell[25225, 708, 11735, 224, 228, "Output",ExpressionUUID->"376be4cd-5abe-4a14-8d87-b7cf8a0723db"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

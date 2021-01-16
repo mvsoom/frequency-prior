@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     78937,       1962]
-NotebookOptionsPosition[     73974,       1872]
-NotebookOutlinePosition[     74307,       1887]
-CellTagsIndexPosition[     74264,       1884]
+NotebookDataLength[     78961,       1962]
+NotebookOptionsPosition[     73998,       1872]
+NotebookOutlinePosition[     74331,       1887]
+CellTagsIndexPosition[     74288,       1884]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1109,24 +1109,24 @@ Cell[TextData[{
  Cell[BoxData[
   FormBox[
    RowBox[{"p", "(", 
-    RowBox[{"u", "|", "X"}], ")"}], TraditionalForm]],ExpressionUUID->
-  "b1d6a2d7-5c48-4dac-97a9-60fb908d0199"],
+    RowBox[{"u", "|", "F"}], ")"}], TraditionalForm]],ExpressionUUID->
+  "40cff6d2-890e-4547-aa28-5bf975faaa74"],
  " where the hyperparameter vector ",
  Cell[BoxData[
   FormBox[
-   RowBox[{"X", "=", 
+   RowBox[{"F", "=", 
     RowBox[{"(", 
      RowBox[{"c", ",", "mF1", ",", "mF2", ",", "..."}], ")"}]}], 
-   TraditionalForm]],ExpressionUUID->"a8bf81ce-eb02-42e3-b63b-4e87d89571b6"],
+   TraditionalForm]],ExpressionUUID->"0ec627d4-0a86-47a6-8151-2758e45a6c7d"],
  " is zero-indexed (",
  Cell[BoxData[
   FormBox[
    RowBox[{
     RowBox[{
-     SubscriptBox["X", "0"], "=", "c"}], ",", 
+     SubscriptBox["F", "0"], "=", "c"}], ",", 
     RowBox[{
-     SubscriptBox["X", "1"], "=", "mF1"}], ",", "..."}], TraditionalForm]],
-  ExpressionUUID->"e474c53d-4388-4d6b-b727-6e73c4e29d6b"],
+     SubscriptBox["F", "1"], "=", "mF1"}], ",", "..."}], TraditionalForm]],
+  ExpressionUUID->"abd38d1f-faaa-428c-83e0-ff3f3c8a87c2"],
  "):\n\t",
  Cell[BoxData[
   FormBox[
@@ -1134,12 +1134,12 @@ Cell[TextData[{
     SubscriptBox["u", "j"], " ", "~", " ", 
     RowBox[{"Exp", "[", 
      SubscriptBox["\[Beta]", "j"], "]"}]}], TraditionalForm]],ExpressionUUID->
-  "015526aa-c7d7-4b7a-93b3-fe6ef2780ae6"],
+  "799f303f-a578-4721-b041-26eb88c8c2a4"],
  "\nHere ",
  Cell[BoxData[
   FormBox[
    SubscriptBox["\[Beta]", "j"], TraditionalForm]],ExpressionUUID->
-  "abfc9423-a992-4e1c-bfed-dbf6c9b4c829"],
+  "77dc9641-b0d2-42da-9a1f-c4b4c46bedec"],
  " is the scale parameter of the exponential (not the rate), and is given by:\
 \n\t",
  Cell[BoxData[
@@ -1148,33 +1148,33 @@ Cell[TextData[{
     SubscriptBox["\[Beta]", "j"], "=", 
     FractionBox[
      RowBox[{
-      SubscriptBox["X", "j"], "-", 
-      SubscriptBox["X", 
+      SubscriptBox["F", "j"], "-", 
+      SubscriptBox["F", 
        RowBox[{"j", "-", "1"}]]}], 
-     SubscriptBox["X", "j"]]}], TraditionalForm]],ExpressionUUID->
-  "16c871b5-145b-4a24-9617-9f2ba283ff4b"],
+     SubscriptBox["F", "j"]]}], TraditionalForm]],ExpressionUUID->
+  "367a55a0-c8fd-4b21-8b97-538649b0e04f"],
  "\nThese expressions derive from combining the ",
  Cell[BoxData[
   FormBox[
    RowBox[{"Exp", "[", 
     RowBox[{"\[Lambda]", ".", "u"}], "]"}], TraditionalForm]],ExpressionUUID->
-  "8891b511-e149-4613-862e-e7594e29a402"],
+  "885fc424-e8a0-4923-8461-5d419c0705c6"],
  " together with the invariant measure ",
  Cell[BoxData[
   FormBox[
    RowBox[{"m", "[", "u", "]"}], TraditionalForm]],ExpressionUUID->
-  "7d2f9384-fafe-4c27-b79b-e2f16a2a56e8"],
+  "eac5e5f3-d4c1-4639-b425-28924ce03571"],
  " and then noting that the joint pdf can be expressed as decoupled ",
  Cell[BoxData[
   FormBox[
    RowBox[{"Exp", "[", 
     SubscriptBox["\[Beta]", "j"], "]"}], TraditionalForm]],ExpressionUUID->
-  "4a5faa1a-dfd4-49ea-9380-c9e2e7ccf4bc"],
+  "6f5a7d23-961b-430f-8b8e-70406d0813f6"],
  " expressions, parametrized by scale instead of rate parameter."
 }], "Text",
  CellChangeTimes->{{3.81975028598578*^9, 3.8197503193007402`*^9}, {
-   3.819750353119761*^9, 3.819750358204636*^9}, 
-   3.819782051998962*^9},ExpressionUUID->"8a407c44-4cf4-4e7d-afa9-\
+   3.819750353119761*^9, 3.819750358204636*^9}, 3.819782051998962*^9, 
+   3.8197833589580803`*^9},ExpressionUUID->"8a407c44-4cf4-4e7d-afa9-\
 8fbebd1bad95"]
 }, Open  ]],
 
@@ -1949,18 +1949,18 @@ Cell[CellGroupData[{
 Cell[36320, 1059, 989, 22, 78, "Input",ExpressionUUID->"84011bcd-a6bf-4543-be72-3484959e1d92"],
 Cell[37312, 1083, 675, 20, 53, "Output",ExpressionUUID->"6842db85-91dc-4b77-94c5-65d96eed0c0a"]
 }, Open  ]],
-Cell[38002, 1106, 2473, 71, 194, "Text",ExpressionUUID->"8a407c44-4cf4-4e7d-afa9-8fbebd1bad95"]
+Cell[38002, 1106, 2497, 71, 194, "Text",ExpressionUUID->"8a407c44-4cf4-4e7d-afa9-8fbebd1bad95"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[40512, 1182, 150, 3, 68, "Section",ExpressionUUID->"82d0ca2a-d6d4-4427-9dee-2d2363c4455c"],
-Cell[40665, 1187, 1041, 31, 60, "Text",ExpressionUUID->"de1e814e-f40b-4e5c-81d7-d0115cba3e7a"],
+Cell[40536, 1182, 150, 3, 68, "Section",ExpressionUUID->"82d0ca2a-d6d4-4427-9dee-2d2363c4455c"],
+Cell[40689, 1187, 1041, 31, 60, "Text",ExpressionUUID->"de1e814e-f40b-4e5c-81d7-d0115cba3e7a"],
 Cell[CellGroupData[{
-Cell[41731, 1222, 1278, 35, 78, "Input",ExpressionUUID->"bfaaff26-af42-4096-96aa-f375297501b1"],
-Cell[43012, 1259, 4636, 132, 66, "Output",ExpressionUUID->"093142f5-0dff-4681-b420-1cbaf81b0f83"]
+Cell[41755, 1222, 1278, 35, 78, "Input",ExpressionUUID->"bfaaff26-af42-4096-96aa-f375297501b1"],
+Cell[43036, 1259, 4636, 132, 66, "Output",ExpressionUUID->"093142f5-0dff-4681-b420-1cbaf81b0f83"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[47685, 1396, 507, 9, 31, "Input",ExpressionUUID->"34c7d022-24a8-49d8-9a4e-ccc887f51341"],
-Cell[48195, 1407, 25739, 460, 228, "Output",ExpressionUUID->"9983ffb1-cdc6-4a2f-a501-03e753a34f15"]
+Cell[47709, 1396, 507, 9, 31, "Input",ExpressionUUID->"34c7d022-24a8-49d8-9a4e-ccc887f51341"],
+Cell[48219, 1407, 25739, 460, 228, "Output",ExpressionUUID->"9983ffb1-cdc6-4a2f-a501-03e753a34f15"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
