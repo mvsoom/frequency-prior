@@ -13,7 +13,9 @@
 #     name: python3
 # ---
 
-# # Sample from $p(\boldsymbol x|\boldsymbol F)$
+# # Testing the samplers
+
+# ## Sample from $p(\boldsymbol x|\boldsymbol F)$
 
 # %pylab inline
 import scipy.stats
@@ -50,7 +52,7 @@ for x in samples:
     axvline(mean(x))
     show()
 
-# ## PPF version for use in nested sampling
+# ### PPF version for use in nested sampling
 
 # +
 from sample_ppf import sample_x_ppf
@@ -76,5 +78,44 @@ J = 3
 samples = vstack([sample_jeffreys_ppf(rand(J), bounds) for _ in range(100000)])
 for x in samples.T:
     hist(x, bins=B)
+    axvline(mean(x))
+    show()
+# -
+
+# ## Testing `ptform_XXX()`
+
+# +
+import model
+
+# %run driver.ipy
+hyper = get_hyperparameters()
+print(hyper)
+# -
+
+# ### `ptform_old`
+
+# +
+Q = 2
+order = (None, Q)
+
+samples = vstack([model.ptform_old(rand(Q*2), order, hyper) for _ in range(100000)])
+for x in samples.T:
+    hist(x, bins=B)
+    axvline(mean(x))
+    show()
+# -
+
+# ### `ptform_new`
+
+# +
+Q = 4
+order = (None, Q)
+
+samples = vstack([model.ptform_new(rand(Q*2), order, hyper) for _ in range(100000)])
+
+U = 6000
+B = 50
+for x in samples.T:
+    hist(x[x<U], bins=B)
     axvline(mean(x))
     show()
