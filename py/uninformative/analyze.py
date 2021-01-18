@@ -7,8 +7,8 @@ from dynesty import utils as dyfunc
 
 def logz(results):
     lz = results['logz'][-1]
-    H = results['information'][-1]
-    return gvar.gvar(lz, np.sqrt(H/results.nlive))
+    sd = results['logzerr'][-1]
+    return gvar.gvar(lz, sd)
 
 def parameter_estimates(results, return_gvars=True):
     samples = results.samples  # samples
@@ -19,7 +19,7 @@ def parameter_estimates(results, return_gvars=True):
     estimates = gvar.gvar(mean, cov) if return_gvars else mean
     return estimates
 
-def analyze(results, ylim_quantiles=(0,.99)):
+def analyze(results, ylim_quantiles=(0,.99), show_runplot=False):
     estimates = parameter_estimates(results)
     
     print("Log Z =", logz(results))
@@ -28,7 +28,7 @@ def analyze(results, ylim_quantiles=(0,.99)):
     #print('Full covariance =')
     #pprint(cov)
     
-    dyplot.runplot(results)
+    if show_runplot: dyplot.runplot(results)
     p, _ = dyplot.traceplot(results, show_titles=True, verbose=True, ylim_quantiles=ylim_quantiles)
     p.tight_layout() # Somehow this still outputs to Jupyter lab
     
