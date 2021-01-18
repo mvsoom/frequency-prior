@@ -8,3 +8,5 @@
    for that either.
 
 2. `model.py:78`: A log() needs to be taken of `χ2_total`.
+
+These errors did not affect the estimates of $B$ and $F$.
