@@ -13,7 +13,16 @@ import joblib
 memory = joblib.Memory('cache', verbose=1)
 
 @memory.cache
-def run_nested(new, order, data, hyper, delta=1., runid=0):
+def run_nested(
+    new,
+    order,
+    data,
+    hyper,
+    delta=1.,
+    runid=0,
+    samplerargs={},
+    runargs={}
+):
     P, Q = order
     ndim = 2*Q
     
@@ -22,16 +31,16 @@ def run_nested(new, order, data, hyper, delta=1., runid=0):
         ptform_new if new else ptform_old,
         ndim=ndim,
         logl_args=(order, data, hyper, delta),
-        ptform_args=(order, hyper)
+        ptform_args=(order, hyper),
+        **samplerargs
     )
     
     start = time.time()
-    sampler.run_nested()
+    sampler.run_nested(**runargs)
     end = time.time()
     
     res = sampler.results
     res['walltime'] = end - start
-    res['runid'] = runid
     return res
 
 def ptform_old(q, order, hyper):
@@ -90,8 +99,8 @@ def eval_G(t, x, order):
     return G # (N, m)
 
 def order_factors(order, data, delta):
-    n = len(data[0])
-    N = sum([len(d) for d in data[0]])
+    n = len(data[1])
+    N = sum([len(d) for d in data[1]])
     P, Q = order
     m = P + 2*Q
     
@@ -99,13 +108,21 @@ def order_factors(order, data, delta):
     logc = -nu*log_pi/2 + _loggamma(nu/2) - n*m*np.log(2*pi*delta**2)/2
     return nu, logc
 
+def contains_alias(x, order, fs):
+    P, Q = order
+    f = x[Q:]
+    return np.any(f >= fs/2)
+
 def loglike(x, order, data, hyper, delta=1.):
+    if contains_alias(x, order, data[0]):
+        return -np.inf
+
     nu, logc = order_factors(order, data, delta)
     
     chi2_total = 0.
     logl = 0.
     
-    for (t, d) in zip(*data):
+    for (t, d) in zip(data[1], data[2]):
         G = eval_G(t, x, order)
         
         b_hat, chi2, rank, s = np.linalg.lstsq(G, d, rcond=None)
