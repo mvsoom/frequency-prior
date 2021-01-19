@@ -1,36 +1,35 @@
-def get_data():
-    import arctic
-    
-    marks = """
-    Time_s
-    0.521712220149
-    0.529017772074
-    0.536285752548
-    0.543491841004
-    """
+import band_bounds as bandwidths
+import freq_bounds as frequencies
 
-    fs0, fs, ts, ds, _ = arctic.load_arctic_file('bdl/arctic_a0017.wav', marks, 8000)
+def get_data(file, resample):
+    import arctic
+
+    fs0, fs, ts, ds, _ = arctic.load_arctic_file(
+        f'arctic/{file}.wav', f'arctic/{file}.marks', resample
+    )
 
     ts = [t/fs for t in ts] # Give units [sec]
 
-    data = (ts, ds)
+    data = (fs, ts, ds)
     return data
 
-def get_PQ_grid():
+def get_PQ_grid(Q_max, P_max):
     import itertools
 
-    Ps = np.arange(0,11)
-    Qs = (1,2,3,4)
+    Ps = np.arange(0, P_max+1)
+    Qs = np.arange(1, Q_max+1)
 
     return list(itertools.product(Ps, Qs))
 
 def get_hyperparameters():
+    # Note that the model clips all frequencies >= fs/2, so we do not
+    # have to take that into account in the frequency bounds.
     bounds = {
-        'b': [(40., 40., 60., 60.), (180., 250., 420., 420.)],
-        'f': [(300., 1000., 2000., 2500.), (900., 2000., 3000., 4000.)]
+        'b': bandwidths.bounds(),
+        'f': frequencies.bounds()
     }
 
-    x0 = 300. # Based on bounds variable just defined
-    Ex = array([600.,1700.,2500.,3800.]) # Roughly base on Vallee (1994)
+    x0 = bounds['f'][0][0] # Lower bound of F1
+    Ex = array([500., 1000., 1500., 2000., 2500.]) # Schwa model
     F = [x0, *Ex]
     return bounds, F
