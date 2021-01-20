@@ -10,7 +10,7 @@ _loggamma = scipy.special.loggamma
 _legendre_basis = np.polynomial.legendre.Legendre.basis
 
 import joblib
-memory = joblib.Memory('cache', verbose=1)
+memory = joblib.Memory('cache', verbose=0)
 
 @memory.cache
 def run_nested(
@@ -18,7 +18,6 @@ def run_nested(
     order,
     data,
     hyper,
-    delta=1.,
     runid=0,
     samplerargs={},
     runargs={}
@@ -30,7 +29,7 @@ def run_nested(
         loglike,
         ptform_new if new else ptform_old,
         ndim=ndim,
-        logl_args=(order, data, hyper, delta),
+        logl_args=(order, data, hyper),
         ptform_args=(order, hyper),
         **samplerargs
     )
@@ -45,7 +44,7 @@ def run_nested(
 
 def ptform_old(q, order, hyper):
     P, Q = order
-    bounds, F = hyper
+    bounds, F, _ = hyper
     
     qb = q[:Q]
     b = sample_jeffreys_ppf(qb, bounds['b'])
@@ -60,7 +59,7 @@ def ptform_old(q, order, hyper):
 
 def ptform_new(q, order, hyper):
     P, Q = order
-    bounds, F = hyper
+    bounds, F, _ = hyper
     
     qb = q[:Q]
     b = sample_jeffreys_ppf(qb, bounds['b'])
@@ -113,10 +112,11 @@ def contains_alias(x, order, fs):
     f = x[Q:]
     return np.any(f >= fs/2)
 
-def loglike(x, order, data, hyper, delta=1.):
+def loglike(x, order, data, hyper):
     if contains_alias(x, order, data[0]):
         return -np.inf
 
+    _, _, delta = hyper
     nu, logc = order_factors(order, data, delta)
     
     chi2_total = 0.

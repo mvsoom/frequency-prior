@@ -16,19 +16,11 @@
 
 # # Driver script
 #
-# - The new prior helped uncover a fifth frequency. F1 has been resolved into two frequencies with overwhelming evidence. The reason we did not see this is because of non-overlapping intervals with the old prior, which precluded F2 getting near F1.
+# - The new prior helped uncover a fifth frequency. F1 has been resolved into two frequencies with overwhelming evidence. The reason we did not see this is because of non-overlapping intervals with the old prior, which precluded F2 getting near F1. We could say that the new prior allows to pick up all the vocal tract *resonancies* which are more fine grained than the canonical formants we are used to; in this example we were able to resolve F1 "doublets".
 #
 # - Original code contained serious errors which, strangely, did not affect the results that much. See `errors.md`.
 #
-# - The prior bounds for $\alpha$ and $\omega$ were chosen given Praat's estimates, so we choose the hyperparameters given that we know that it was `/ae/`. From Vallee (1994) we get: $\langle \boldsymbol x \rangle = (610, 1706, 2450, 3795)$. We then round these numbers. The lowerbound $x_0$ is chosen as the lower bound of $F_1$'s interval used in the paper.
-#
-# - Note that the prior bounds for $F$ have very little overlap: kind of like cheating.
-#
-# - Current thoughts: new priors are indeed *very* uninformative (also have less bounds to set), so higher $H$ and longer runtimes compared to prior with very definite, hardly overlapping bounds.
-#
-# - After running, find the "true value" of the bandwidths $B$. Then set these to fixed values so we can compare differences in the prior of frequencies only.
-#
-# - Try wider bounds with actual overlap to see what the effect is.
+# - After running, find the "true value" of the bandwidths $B$. Then set these to fixed values and rerun analysis so we can compare differences in the prior of frequencies only.
 #
 # - We could compare our prior to a range of nested sampling runs with lognormals as priors with different relative uncertainty $\rho$ and then see to roughly which value of $\rho$ our prior corresponds by comparing the information (i.e. similar information as our prior for $\rho = \rho^*$ $\rightarrow$ our prior is like $\rho^*\%$ uncertainty).
 #
@@ -61,33 +53,22 @@
 
 # +
 # %pylab inline
-
-import joblib
-import model
 import analyze
+import driver_script
+import aux
+
+# Allows you to see progress (garbled)
+# #%run driver_script.py "bdl/arctic_a0017"
+
+# Execute this line to suppress dynesty's output to stderr
+# # %python3 driver_script.py "bdl/arctic_a0017" 2>/dev/null
 
 # +
-# %run driver.ipy
+data = aux.get_data("bdl/arctic_a0017", 11000)
+hyper = aux.get_hyperparameters()
 
-PQ_grid = get_PQ_grid(5, 10)
-data = get_data('bdl/arctic_a0017', 11000)
-hyper = get_hyperparameters()
+analyze.analyze(driver_script.run_nested(False, 0, 2, data, hyper))
+# -
 
-# +
-# The all-important parameters for nested sampling
-samplerargs = {'nlive': 500, 'bound': 'multi', 'sample': 'rslice', 'bootstrap': 10}
-runargs = {'save_bounds': False}
 
-# Output to stdout is not printed in the notebook. If this is desired,
-# change backend to "multiprocessing" and uncomment the decorator
-# @memory.cache of model.run_nested()
-options = dict(n_jobs=6, verbose=50, timeout=60*60*2, backend=None)
 
-runid = 0
-
-with joblib.Parallel(**options) as parallel:
-    parallel(
-        joblib.delayed(model.run_nested)(
-            new, order, data, hyper, runid=runid
-        ) for order in PQ_grid for new in (False, True)
-    )
