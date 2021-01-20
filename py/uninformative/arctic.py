@@ -6,7 +6,7 @@ from scipy.io import wavfile
 import scipy.signal
 import parse
 
-def parse_marks(marks):
+def parse_marks(marks, print_comments=True):
     try:
         with open(marks, 'r') as f:
             marks_content = f.read()
@@ -16,9 +16,10 @@ def parse_marks(marks):
     
     res = []
     for line in marks.splitlines():
-        print(line)
         if line[0] != '#':
             res.append(float(line))
+        else:
+            if print_comments: print(line)
 
     return np.asarray(res)
 
@@ -80,7 +81,7 @@ def apply_polarity(ds, eggs, polarity):
         eggs = multiply(eggs, polarity)
     return ds, eggs
 
-def load_arctic_file(path, marks, resample=False, polarity=+1):
+def load_arctic_file(path, marks, resample=False, polarity=+1, print_mark_comments=True):
     """
     Args:
         path (str): Path to wav file with speech signal in ch 1 and EGG in ch 2.
@@ -89,6 +90,7 @@ def load_arctic_file(path, marks, resample=False, polarity=+1):
             the contents of this file will be used as the string.
         polarity (float or 2-tuple): If tuple, polarity = (d_polarity, egg_polarity).
             Otherwise the same polarity is applie to both.
+        print_mark_comments (bool): Print comments in the `marks` argument.
     
     Returns:
         fs0: Original sampling rate
@@ -98,7 +100,7 @@ def load_arctic_file(path, marks, resample=False, polarity=+1):
         ds_float64 (list of arrays)
         eggs_float64 (list of arrays)
     """
-    marks = parse_marks(marks)
+    marks = parse_marks(marks, print_mark_comments)
     validate_marks(marks)
     
     fs0, data0 = wavfile.read(path)
