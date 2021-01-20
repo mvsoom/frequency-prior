@@ -16,9 +16,10 @@ def parse_marks(marks):
     
     res = []
     for line in marks.splitlines():
-        line_res = parse.search('{:f}', line) # Extract first floating point number
-        if line_res:
-            res.append(line_res.fixed[0])
+        print(line)
+        if line[0] != '#':
+            res.append(float(line))
+
     return np.asarray(res)
 
 def validate_marks(marks):
@@ -83,8 +84,8 @@ def load_arctic_file(path, marks, resample=False, polarity=+1):
     """
     Args:
         path (str): Path to wav file with speech signal in ch 1 and EGG in ch 2.
-        marks (str): If str, the marks are given in seconds by the first float
-            on each line in the string (if any). If a path to a text file,
+        marks (str): If str, the marks are given in seconds. Each line must contain
+            a mark, unless if it starts with '#'. If a path to a text file,
             the contents of this file will be used as the string.
         polarity (float or 2-tuple): If tuple, polarity = (d_polarity, egg_polarity).
             Otherwise the same polarity is applie to both.
