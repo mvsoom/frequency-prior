@@ -7,7 +7,13 @@ from dynesty import utils as dyfunc
 
 def logz(results):
     lz = results['logz'][-1]
-    sd = results['logzerr'][-1]
+    # Use crude estimate of standard deviation of logz from @Skilling2006
+    # instead of the one supplied by dynesty -- the latter can get awkwardly
+    # large.
+    # sd = results['logzerr'][-1]
+    H = results['information'][-1]
+    N = results['nlive']
+    sd = np.sqrt(H/N)
     return gvar.gvar(lz, sd)
 
 def parameter_estimates(results, return_gvars=True):
