@@ -105,9 +105,10 @@ r.information[-1],
 output_file = "post/run_stats.csv"
 
 help(csv.DictWriter)
-
-# +
-# open?
 # -
 
+a = diff(r.logl) > 0
+a[-1000:]
 
+# + active=""
+#
