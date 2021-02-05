@@ -16,6 +16,14 @@
 
 # # Driver script
 #
+# ## Current session
+#
+# The PC is running `driver_pc.sh`, the Mac is running `driver_mac.sh`.
+#
+# **Update:** Finished overnight and caches have been transferred using `transfer_cache_*.sh` scripts. But joblib doesn't seem to use the caches.
+#
+# ## Notes
+#
 # - The new prior helped uncover a fifth frequency. F1 has been resolved into two frequencies with overwhelming evidence. The reason we did not see this is because of non-overlapping intervals with the old prior, which precluded F2 getting near F1. We could say that the new prior allows to pick up all the vocal tract *resonancies* which are more fine grained than the canonical formants we are used to; in this example we were able to resolve F1 "doublets".
 #
 # - Original code contained serious errors which, strangely, did not affect the results that much. See `errors.md`.
@@ -64,11 +72,42 @@ import aux
 # # %python3 driver_script.py "bdl/arctic_a0017" 2>/dev/null
 
 # +
-data = aux.get_data("bdl/arctic_a0017", 11000)
+#data = aux.get_data("bdl/arctic_a0017", 11000)
+data = aux.get_data("rms/arctic_a0382", 11000)
 hyper = aux.get_hyperparameters()
 
-analyze.analyze(driver_script.run_nested(False, 0, 2, data, hyper))
+analyze.analyze(driver_script.run_nested(False, 10, 5, data, hyper))
+
+
+# +
+import pandas
+d = []
+
+for new, P, Q in aux.get_grid(10, 5):
+    res = driver_script.run_nested(new, P, Q, data, hyper)
+    print(new, P, Q, res.logz[-1], sep='\t')
+    d.append([new, P, Q, res.logz[-1], res.walltime])
+
+d = pandas.DataFrame(d, columns=('new', 'P', 'Q', 'lz', 'walltime'))
 # -
 
+d.sort_values('lz')
+
+analyze.analyze(driver_script.run_nested(True, 10, 5, data, hyper))
+
+analyze.analyze(driver_script.run_nested(False, 5, 4, data, hyper))
+
+res
+
+r.information[-1],
+
+# +
+output_file = "post/run_stats.csv"
+
+help(csv.DictWriter)
+
+# +
+# open?
+# -
 
 
