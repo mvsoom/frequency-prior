@@ -16,9 +16,16 @@ def logz(results):
     sd = np.sqrt(H/N)
     return gvar.gvar(lz, sd)
 
+def exp_and_normalize(logw):
+    # We don't normalize with log Z because complete posterior samples can
+    # have log densities much larger than log Z, leading to large weights.
+    nw = np.exp(logw - np.max(logw))
+    nw /= sum(nw)
+    return nw
+
 def parameter_estimates(results, return_gvars=True):
     samples = results.samples
-    weights = np.exp(results.logwt - results.logz[-1])
+    weights = exp_and_normalize(results.logwt)
     
     # Compute weighted mean and covariance.
     mean, cov = dyfunc.mean_and_cov(samples, weights)
@@ -42,7 +49,7 @@ def analyze(results, ylim_quantiles=(0,.99), show_runplot=False):
 
 def resample_results(results):
     samples = results.samples
-    weights = np.exp(results.logwt - results.logz[-1])
+    weights = exp_and_normalize(results.logwt)
     
     new = copy.deepcopy(results)
     new.samples = dyfunc.resample_equal(samples, weights)
