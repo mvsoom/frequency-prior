@@ -10,15 +10,15 @@ def logz(results):
     # Use crude estimate of standard deviation of logz from @Skilling2006
     # instead of the one supplied by dynesty -- the latter can get awkwardly
     # large.
-    # sd = results['logzerr'][-1]
+    #sd = results['logzerr'][-1]
     H = results['information'][-1]
     N = results['nlive']
     sd = np.sqrt(H/N)
     return gvar.gvar(lz, sd)
 
 def parameter_estimates(results, return_gvars=True):
-    samples = results.samples  # samples
-    weights = np.exp(results.logwt - results.logz[-1])  # normalized weights
+    samples = results.samples
+    weights = np.exp(results.logwt - results.logz[-1])
     
     # Compute weighted mean and covariance.
     mean, cov = dyfunc.mean_and_cov(samples, weights)
@@ -46,5 +46,5 @@ def resample_results(results):
     
     new = copy.deepcopy(results)
     new.samples = dyfunc.resample_equal(samples, weights)
-    new.logwt = np.repeat(-np.log(len(weights)), len(weights))
+    new.logwt = np.log(np.ones(len(weights))/len(weights))
     return new
