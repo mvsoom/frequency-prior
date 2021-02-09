@@ -18,7 +18,7 @@ $p(b,\theta,\sigma|D)$ for a sample $\theta \in \theta_{1:J}$ with weight
 $w^{(\theta)}$, we first sample $\sigma$ from $p(\sigma|\theta,D)$ and then
 sample $b_i$ from $p(b_i|\sigma,\theta,D)$. This is based on the decomposition
 
-$$ p(b,\theta,\sigma) = p(\theta|D) \times p(\sigma|\theta,D) \times
+$$ p(b,\theta,\sigma|D) = p(\theta|D) \times p(\sigma|\theta,D) \times
 p(b|\theta,\sigma,D). $$
 
 This decomposition also tells us the weight $w^{(b,\theta,\sigma)}$ to assign
