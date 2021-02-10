@@ -23,9 +23,14 @@ def exp_and_normalize(logw):
     nw /= sum(nw)
     return nw
 
-def parameter_estimates(results, return_gvars=True):
-    samples = results.samples
-    weights = exp_and_normalize(results.logwt)
+def parameter_estimates(results_or_samples, return_gvars=True):
+    try:
+        samples = results_or_samples.samples
+        logwt = results_or_samples.logwt
+    except AttributeError:
+        samples, logwt = results_or_samples
+    
+    weights = exp_and_normalize(logwt)
     
     # Compute weighted mean and covariance.
     mean, cov = dyfunc.mean_and_cov(samples, weights)
@@ -47,7 +52,7 @@ def analyze(results, ylim_quantiles=(0,.99), show_runplot=False):
     
     dyplot.cornerplot(results)
 
-def resample_results(results):
+def resample(results_or_samples):
     samples = results.samples
     weights = exp_and_normalize(results.logwt)
     
