@@ -52,11 +52,8 @@ def analyze(results, ylim_quantiles=(0,.99), show_runplot=False):
     
     dyplot.cornerplot(results)
 
-def resample(results_or_samples):
-    samples = results.samples
-    weights = exp_and_normalize(results.logwt)
-    
-    new = copy.deepcopy(results)
-    new.samples = dyfunc.resample_equal(samples, weights)
-    new.logwt = np.log(np.ones(len(weights))/len(weights))
-    return new
+def resample(samples, logwt, n):
+    weights = exp_and_normalize(logwt)
+    samples = dyfunc.resample_equal(samples, weights)
+    i = np.random.choice(len(weights), size=n, replace=False)
+    return samples[i,:]
