@@ -52,7 +52,7 @@ def analyze(results, ylim_quantiles=(0,.99), show_runplot=False):
     
     dyplot.cornerplot(results)
 
-def resample(samples, logwt, n):
+def resample_equal(samples, logwt, n):
     weights = exp_and_normalize(logwt)
     samples = dyfunc.resample_equal(samples, weights)
     i = np.random.choice(len(weights), size=n, replace=False)
