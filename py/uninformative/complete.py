@@ -33,7 +33,7 @@ def complete_samples(order, data, results, n_jobs=-1):
     samples, logwt = results.samples, results.logwt
     nu, _ = model.order_factors(order, data, np.nan)
     
-    def complete_sample(x, w):
+    def complete_sample(x, lw, beef=1e-9):
         b_hats, gs, chi2s = [], [], []
 
         for (t, d) in zip(data[1], data[2]):
@@ -41,7 +41,8 @@ def complete_samples(order, data, results, n_jobs=-1):
 
             b_hat, chi2, rank, s = np.linalg.lstsq(G, d, rcond=None)
             g = G.T @ G
-            
+            g[np.diag_indices_from(g)] += beef
+
             b_hats += [b_hat]
             gs += [g]
             chi2s += [float(chi2)]
@@ -50,7 +51,7 @@ def complete_samples(order, data, results, n_jobs=-1):
         bs, lqs = sample_bs(b_hats, gs, sigma)
         
         complete_sample = np.hstack([*bs, x, [sigma]])
-        complete_logwt = w + lp + np.sum(lqs)
+        complete_logwt = lw + lp + np.sum(lqs)
         
         return complete_sample, complete_logwt
 
