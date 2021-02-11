@@ -37,7 +37,7 @@ def parameter_estimates(results_or_samples, return_gvars=True):
     estimates = gvar.gvar(mean, cov) if return_gvars else mean
     return estimates
 
-def analyze(results, ylim_quantiles=(0,.99), show_runplot=False):
+def analyze(results, ylim_quantiles=(0,.99), trace_only=True):
     estimates = parameter_estimates(results)
     
     print("Log Z =", logz(results))
@@ -46,11 +46,11 @@ def analyze(results, ylim_quantiles=(0,.99), show_runplot=False):
     #print('Full covariance =')
     #pprint(cov)
     
-    if show_runplot: dyplot.runplot(results)
+    if not trace_only: dyplot.runplot(results)
     p, _ = dyplot.traceplot(results, show_titles=True, verbose=True, ylim_quantiles=ylim_quantiles)
     p.tight_layout() # Somehow this still outputs to Jupyter lab
     
-    dyplot.cornerplot(results)
+    if not trace_only: dyplot.cornerplot(results)
 
 def resample_equal(samples, logwt, n):
     weights = exp_and_normalize(logwt)
