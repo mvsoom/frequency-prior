@@ -4,6 +4,10 @@ import copy
 import dynesty
 from dynesty import plotting as dyplot
 from dynesty import utils as dyfunc
+import matplotlib.pyplot as plt
+
+import driver_script
+import complete
 
 def logz(results):
     lz = results['logz'][-1]
@@ -93,6 +97,7 @@ def model_function_estimates(
         data
     )
 
+    n = len(data)
     fs_samples = [trends_samples[j] + periodics_samples[j] for j in range(n)]
 
     def to_gvar(a):
@@ -106,23 +111,157 @@ def model_function_estimates(
     
     return trends, periodics, fs
 
-def analyze(results, ylim_quantiles=(0,.99), trace_only=True):
-    estimates = parameter_estimates(results)
-    
-    print("Log Z =", logz(results))
-    print("Information =", results['information'][-1])
-    print('Estimates =', estimates)
-    #print('Full covariance =')
-    #pprint(cov)
-    
-    if not trace_only: dyplot.runplot(results)
-    p, _ = dyplot.traceplot(results, show_titles=True, verbose=True, ylim_quantiles=ylim_quantiles)
-    p.tight_layout() # Somehow this still outputs to Jupyter lab
-    
-    if not trace_only: dyplot.cornerplot(results)
-
 def resample_equal(samples, logwt, n):
     weights = exp_and_normalize(logwt)
     samples = dyfunc.resample_equal(samples, weights)
     i = np.random.choice(len(weights), size=n, replace=False)
     return samples[i,:]
+
+def analyze(
+    new,
+    order,
+    data,
+    hyper,
+    complete_analysis=False,
+    plot=True,
+    dyplots_kwargs = {},
+    modelplots_kwargs = {}
+):
+    P, Q = order
+    
+    # Get samples
+    results = driver_script.run_nested(new, P, Q, data, hyper)
+    
+    # Calculate estimates
+    estimates = parameter_estimates(results)
+    
+    print("Log Z =", logz(results))
+    print("Information =", results['information'][-1])
+    print("Estimates =", estimates)
+    
+    # Show nested sampling plots
+    if plot: show_dyplots(results, **dyplots_kwargs)
+    
+    # Bail out early if possible
+    if not complete_analysis:
+        return {'results': results, 'estimates': estimates}
+    
+    # Get complete samples
+    complete_samples, complete_logwts = complete.complete_samples(order, data, results)
+
+    # Calculate complete estimates and SNR estimates
+    complete_estimates = parameter_estimates((complete_samples, complete_logwts))
+    SNR, bs_SNR_pitch_periods = SNR_estimates(complete_estimates, order, data)
+    
+    print("Approximate SNR =", SNR)
+    print("Approximate amplitude SNR per pitch period =")
+    for bs in bs_SNR_pitch_periods: print(bs)
+    
+    # Calculate trend and periodic components using resampling
+    trends, periodics, fs = model_function_estimates(
+        complete_samples,
+        complete_logwts,
+        order,
+        data,
+        num_resample=2000
+    )
+    
+    # Plot components, model function and data
+    if plot: show_modelplots(data, trends, periodics, fs, **modelplots_kwargs)
+    
+    return {
+        'results': results,
+        'estimates': estimates,
+        'complete_samples': complete_samples,
+        'complete_logwts': complete_logwts,
+        'complete_estimates': complete_estimates,
+        'SNR': SNR,
+        'bs_SNR_pitch_periods': bs_SNR_pitch_periods,
+        'trends': trends,
+        'periodics': periodics,
+        'fs': fs
+    }
+    
+def get_labels(results):
+    Q = int(results.samples.shape[1] / 2)
+    return [f"$B_{i+1}$" for i in range(Q)] + [f"$F_{i+1}$" for i in range(Q)]
+
+def show_dyplots(results, ylim_quantiles=(0,.99), trace_only=True):
+    if trace_only is None: return
+
+    if not trace_only: dyplot.runplot(results)
+
+    # This uses a locally modified version of dyplot.traceplot(). The ylim_quantiles
+    # are used to reject samples with a likelihood of zero, i.e. samples with
+    # formant frequencies larger than fs/2. There are other ways of dealing with this,
+    # such as resampling or sifting out samples with logl = -1e300.
+    p, _ = dyplot.traceplot(
+        results, show_titles=True, ylim_quantiles=ylim_quantiles, labels = get_labels(results)
+    )
+    p.tight_layout() # Somehow this still outputs to Jupyter lab
+
+    if not trace_only: dyplot.cornerplot(results)
+
+def show_modelplots(
+    data,
+    trends,
+    periodics,
+    fs,
+    num_posterior_samples=20,
+    offset=2,
+    figsize=(12,2)
+):
+    def ugly_hack(data, d):
+        t = data[1][0]
+        dt = t[1] - t[0]
+        return np.arange(len(d))*dt*1000 # (msec)
+    
+    d = np.concatenate(data[2])
+    t = ugly_hack(data, d)
+    trend = np.concatenate(trends)
+    periodic = np.concatenate(periodics)
+    f = np.concatenate(fs)
+    
+    def samples(g):
+        s = [gvar.sample(g) for i in range(num_posterior_samples)]
+        return np.array(s).T
+
+    def plot_data(i):
+        plt.plot(t, d - i*offset, '--', color='black')
+
+    def plot_samples(g, i, color='black', alpha=1/num_posterior_samples):
+        plt.plot(t, samples(g) - i*offset, color=color, alpha=alpha)
+
+    width, height = figsize
+    plt.figure(figsize=(width, height*3))
+    plt.title('Posterior samples of the model function and its components')
+    plt.xlabel('time [msec]')
+    plt.ylabel('amplitude [a.u.]')
+
+    # Plot data vs. full model function
+    plot_data(0)
+    plot_samples(f, 0)
+    
+    # Plot components
+    plot_data(1)
+    plot_samples(trend, 1)
+    
+    plot_data(2)
+    plot_samples(periodic, 2)
+    
+    plt.show()
+    
+    # Plot normalized glottal flow
+    plt.figure(figsize=(width, height))
+    plt.title('Posterior samples of the "glottal flow"')
+    plt.xlabel('time [msec]')
+    plt.ylabel('amplitude [a.u.]')
+    
+    gf = np.cumsum(trend)
+    gf_mean = gvar.mean(gf)
+    scale = gf_mean.max() - gf_mean.min()
+    
+    plot_data(0)
+    plot_samples(gf/scale, 0)
+
+    plt.show()
