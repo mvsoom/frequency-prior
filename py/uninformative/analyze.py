@@ -37,6 +37,34 @@ def parameter_estimates(results_or_samples, return_gvars=True):
     estimates = gvar.gvar(mean, cov) if return_gvars else mean
     return estimates
 
+def model_function_estimates(
+    complete_samples,
+    complete_logwts,
+    order,
+    data,
+    num_resample=2000
+):
+    trends_samples, periodics_samples = complete.sample_trends_and_periodics(
+        complete_samples,
+        complete_logwts,
+        num_resample,
+        order,
+        data
+    )
+
+    fs_samples = [trends_samples[j] + periodics_samples[j] for j in range(n)]
+
+    def to_gvar(a):
+        mean = np.mean(a, axis=0)
+        cov = np.cov(a, rowvar=False)
+        return gvar.gvar(mean, cov)
+
+    trends = [to_gvar(a) for a in trends_samples]
+    periodics = [to_gvar(a) for a in periodics_samples]
+    fs = [to_gvar(a) for a in fs_samples]
+    
+    return trends, periodics, fs
+
 def analyze(results, ylim_quantiles=(0,.99), trace_only=True):
     estimates = parameter_estimates(results)
     
