@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.stats import invgamma, multivariate_normal
 import model
+import analyze
 
 import joblib
 memory = joblib.Memory('cache', verbose=0)
@@ -62,3 +63,42 @@ def complete_samples(order, data, results, n_jobs=-1):
 
     complete_samples, complete_logwts = zip(*zipped)
     return np.array(complete_samples), np.array(complete_logwts)
+
+def sample_trends_and_periodics(
+    complete_samples,
+    complete_logwts,
+    num_resample,
+    order,
+    data
+):
+    P, Q = order
+    n = len(data[1])
+    m = P + 2*Q
+    
+    def alloc_samples():
+        shapes = [(num_resample, len(data[1][j])) for j in range(n)]
+        return [np.empty(shape) for shape in shapes]
+
+    trends = alloc_samples()
+    periodics = alloc_samples()
+    
+    # Downsample to equally-weighted samples
+    complete_samples_equal = analyze.resample_equal(
+        complete_samples, complete_logwts, num_resample
+    )
+
+    for i, complete_sample in enumerate(complete_samples_equal):
+        bs, x, sigma = np.split(complete_sample, [n*m, -1])
+
+        bs_pitch_periods = np.split(bs, n)
+        for j, (b, t, d) in enumerate(zip(bs_pitch_periods, data[1], data[2])):
+            G = model.eval_G(t, x, order)
+
+            trend = G[:,:P] @ b[:P]
+            periodic = G[:,P:] @ b[P:]
+
+            trends[j][i,:] = trend
+            periodics[j][i,:] = periodic
+    
+    # Return equally-weighted samples
+    return trends, periodics
