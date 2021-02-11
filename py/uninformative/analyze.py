@@ -37,6 +37,47 @@ def parameter_estimates(results_or_samples, return_gvars=True):
     estimates = gvar.gvar(mean, cov) if return_gvars else mean
     return estimates
 
+def SNR_estimates(complete_estimates, order, data):
+    """Calculate SNR for the model function f and individual amplitudes
+    
+    Note that we use approximations. In the case of global SNR, the
+    correct approach would be to calculate the SNR
+    
+        SNR = 10 log10[f.T @ f/N sigma²]
+    
+    for each complete sample (bs, x, sigma) -- where we calculate f from bs
+    and x as is done in complete.sample_trends_and_periodics() -- and
+    average over the thusly acquired SNR samples to get the final result.
+    
+    In practice, however, if the fit is reasonable, a very good approximation
+    is simply taking the empirical SNR with the noise power set to the
+    estimate of sigma². This is what we do here.
+    
+    In the case of the amplitude SNRs, we should follow the same approach.
+    Instead we just use the gvar approximation of dividing the Gaussian
+    representations of the amplitudes and sigma, which holds if the stdev
+    is sufficiently small. This is not the case for some amplitudes, and
+    very wide stdevs are returned sometimes. Therefore the resulting
+    SNRs are only accurate if their stdevs are small. If this is not the
+    case, this probably means the actual posterior distrubution of the
+    SNR is badly approximated by a Gaussian (too wide/multimodality/etc.).
+    """
+    P, Q = order
+    n = len(data[1])
+    m = P + 2*Q
+    bs, x, sigma = np.split(complete_estimates, [n*m, -1])
+    del x
+    
+    def log10(gvar): return np.log(gvar)/np.log(10)
+    
+    d = np.concatenate(data[2])
+    SNR = 10*log10(d.T @ d/(len(d)*sigma**2))
+    
+    bs_SNR = 10*log10(bs**2/sigma**2)
+    bs_SNR_pitch_periods = np.split(bs_SNR, n)
+
+    return SNR, bs_SNR_pitch_periods
+
 def model_function_estimates(
     complete_samples,
     complete_logwts,
