@@ -64,23 +64,31 @@ def complete_samples(order, data, results, n_jobs=-1):
     complete_samples, complete_logwts = zip(*zipped)
     return np.array(complete_samples), np.array(complete_logwts)
 
-def sample_trends_and_periodics(
+def sample_components_and_spectrum(
     complete_samples,
     complete_logwts,
     num_resample,
     order,
-    data
+    data,
+    num_freq
 ):
     P, Q = order
     n = len(data[1])
     m = P + 2*Q
     
-    def alloc_samples():
+    def alloc_component_samples():
         shapes = [(num_resample, len(data[1][j])) for j in range(n)]
         return [np.empty(shape) for shape in shapes]
+    
+    def alloc_spectrum_samples():
+        shapes = [(num_resample, num_freq) for j in range(n)]
+        return [np.empty(shape) for shape in shapes]
 
-    trends = alloc_samples()
-    periodics = alloc_samples()
+    trends = alloc_component_samples()
+    periodics = alloc_component_samples()
+    spectra = alloc_spectrum_samples()
+    
+    frequencies = freqspace(num_freq, data[0])
     
     # Downsample to equally-weighted samples
     complete_samples_equal = analyze.resample_equal(
@@ -96,9 +104,34 @@ def sample_trends_and_periodics(
 
             trend = G[:,:P] @ b[:P]
             periodic = G[:,P:] @ b[P:]
+            spectrum = magnitude_spectrum(b[P:], x, frequencies)
 
             trends[j][i,:] = trend
             periodics[j][i,:] = periodic
+            spectra[j][i,:] = spectrum
     
     # Return equally-weighted samples
-    return trends, periodics
+    return trends, periodics, spectra
+
+def freqspace(n, fs):
+    return np.linspace(0, fs/2, n)
+
+def magnitude_spectrum(b_periodic, x, freqs):
+    b_periodic = b_periodic[:,None]
+    x = x[:,None]
+    s = (2*np.pi*1j)*freqs[None,:] # Laplace operator variable
+    
+    b_cos, b_sin = np.split(b_periodic, 2)
+    bandwidth, frequency = np.split(x, 2) # Hz
+    
+    # Rescale
+    alpha = np.pi*bandwidth
+    omega = 2*np.pi*frequency
+    
+    # Calculate analytical Laplace transform of the periodic component
+    numerator = (alpha + s)*b_cos + omega*b_sin
+    denominator = (alpha + s)**2 + omega**2
+    laplace_tf = np.sum(numerator/denominator, axis=0) # Sum over (bandwidth, frequency) pairs
+    
+    magnitude = np.abs(laplace_tf)
+    return magnitude
