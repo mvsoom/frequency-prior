@@ -41,6 +41,9 @@ def parameter_estimates(results_or_samples, return_gvars=True):
     estimates = gvar.gvar(mean, cov) if return_gvars else mean
     return estimates
 
+def _log10(gvar):
+    return np.log(gvar)/np.log(10)
+
 def SNR_estimates(complete_estimates, order, data):
     """Calculate SNR for the model function f and individual amplitudes
     
@@ -72,30 +75,38 @@ def SNR_estimates(complete_estimates, order, data):
     bs, x, sigma = np.split(complete_estimates, [n*m, -1])
     del x
     
-    def log10(gvar): return np.log(gvar)/np.log(10)
-    
     d = np.concatenate(data[2])
-    SNR = 10*log10(d.T @ d/(len(d)*sigma**2))
+    SNR = 10*_log10(d.T @ d/(len(d)*sigma**2))
     
-    bs_SNR = 10*log10(bs**2/sigma**2)
+    bs_SNR = 10*_log10(bs**2/sigma**2)
     bs_SNR_pitch_periods = np.split(bs_SNR, n)
 
     return SNR, bs_SNR_pitch_periods
+
+def PDR_estimate(ds, periodics):
+    d = np.concatenate(ds)
+    p = np.concatenate(periodics)
+
+    return 10.*_log10(np.sum(p**2)/np.sum(d**2))
 
 def model_function_estimates(
     complete_samples,
     complete_logwts,
     order,
     data,
-    num_resample=2000
+    num_resample=2000,
+    num_freq=1000
 ):
-    trends_samples, periodics_samples = complete.sample_trends_and_periodics(
+    samples = complete.sample_components_and_spectrum(
         complete_samples,
         complete_logwts,
         num_resample,
         order,
-        data
+        data,
+        num_freq
     )
+    
+    trends_samples, periodics_samples, spectra_samples = samples
 
     n = len(data)
     fs_samples = [trends_samples[j] + periodics_samples[j] for j in range(n)]
@@ -108,8 +119,9 @@ def model_function_estimates(
     trends = [to_gvar(a) for a in trends_samples]
     periodics = [to_gvar(a) for a in periodics_samples]
     fs = [to_gvar(a) for a in fs_samples]
+    spectra = [to_gvar(a) for a in spectra_samples]
     
-    return trends, periodics, fs
+    return trends, periodics, fs, spectra
 
 def resample_equal(samples, logwt, n):
     weights = exp_and_normalize(logwt)
@@ -122,10 +134,13 @@ def analyze(
     order,
     data,
     hyper,
-    complete_analysis=False,
+    complete_analysis=True,
     plot=True,
+    num_resample=2000,
+    num_freq=250,
     dyplots_kwargs = {},
-    modelplots_kwargs = {}
+    modelplots_kwargs = {},
+    spectrumplots_kwargs = {}
 ):
     P, Q = order
     
@@ -153,21 +168,31 @@ def analyze(
     complete_estimates = parameter_estimates((complete_samples, complete_logwts))
     SNR, bs_SNR_pitch_periods = SNR_estimates(complete_estimates, order, data)
     
-    print("Approximate SNR =", SNR)
-    print("Approximate amplitude SNR per pitch period =")
+    print("Approximate SNR (dB) =", SNR)
+    print("Approximate amplitude SNR per pitch period (dB) =")
     for bs in bs_SNR_pitch_periods: print(bs)
     
     # Calculate trend and periodic components using resampling
-    trends, periodics, fs = model_function_estimates(
+    trends, periodics, fs, spectra = model_function_estimates(
         complete_samples,
         complete_logwts,
         order,
         data,
-        num_resample=2000
+        num_resample=num_resample,
+        num_freq=num_freq
     )
+    
+    PDR = PDR_estimate(data[2], periodics)
+    print("Periodic to data power ratio PDR (dB) =", PDR)
     
     # Plot components, model function and data
     if plot: show_modelplots(data, trends, periodics, fs, **modelplots_kwargs)
+    
+    # Plot power spectrum of data and inferred impulse response
+    freqs = complete.freqspace(num_freq, data[0])
+    spectrum = np.mean(spectra,axis=0) # Average spectra over pitch periods
+    
+    if plot: show_spectrumplot(data, spectrum, freqs, **spectrumplots_kwargs)
     
     return {
         'results': results,
@@ -179,9 +204,13 @@ def analyze(
         'bs_SNR_pitch_periods': bs_SNR_pitch_periods,
         'trends': trends,
         'periodics': periodics,
-        'fs': fs
+        'fs': fs,
+        'PDR'
+        'spectra': spectra,
+        'freqs': freqs,
+        'spectrum': spectrum # Power spectrum in dB averaged over pitch periods
     }
-    
+
 def get_labels(results):
     Q = int(results.samples.shape[1] / 2)
     return [f"$B_{i+1}$" for i in range(Q)] + [f"$F_{i+1}$" for i in range(Q)]
@@ -207,7 +236,7 @@ def show_modelplots(
     trends,
     periodics,
     fs,
-    num_posterior_samples=20,
+    num_posterior_samples=25,
     offset=2,
     figsize=(12,2)
 ):
@@ -234,7 +263,7 @@ def show_modelplots(
 
     width, height = figsize
     plt.figure(figsize=(width, height*3))
-    plt.title('Posterior samples of the model function and its components')
+    plt.title('Data vs. posterior samples of the model function and its components')
     plt.xlabel('time [msec]')
     plt.ylabel('amplitude [a.u.]')
 
@@ -253,7 +282,7 @@ def show_modelplots(
     
     # Plot normalized glottal flow
     plt.figure(figsize=(width, height))
-    plt.title('Posterior samples of the "glottal flow"')
+    plt.title('Data vs. posterior samples of the "glottal flow"')
     plt.xlabel('time [msec]')
     plt.ylabel('amplitude [a.u.]')
     
@@ -264,4 +293,35 @@ def show_modelplots(
     plot_data(0)
     plot_samples(gf/scale, 0)
 
+    plt.show()
+
+def show_spectrumplot(
+    data,
+    spectrum,
+    freqs,
+    n_pad=None,
+    num_posterior_samples=25,
+    figsize=(12,4)
+):
+    plt.figure(figsize=figsize)
+    plt.title('Spectrum of data vs. posterior samples of impulse response spectrum')
+    plt.xlabel('Frequency [Hz]')
+    plt.ylabel('Spectral power (dB)')
+
+    # Calculate power spectrum of data with correct (dt scaling).
+    # See ./FFT_scaling.ipynb for details.
+    d = np.concatenate(data[2])
+    dt = 1/data[0]
+    D = np.fft.rfft(d, n_pad)*dt
+    D_freq = np.fft.rfftfreq(n_pad if n_pad else len(d), dt)
+
+    plt.plot(D_freq, 20*np.log10(np.abs(D)), '--', color='black')
+    
+    # Plot posterior samples of pitch-period-averaged power spectrum (already in dB)
+    def samples(g):
+        s = [gvar.sample(g) for i in range(num_posterior_samples)]
+        return np.array(s).T
+
+    plt.plot(freqs, samples(spectrum), color='black', alpha=1/num_posterior_samples)
+    
     plt.show()
