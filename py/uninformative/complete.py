@@ -1,4 +1,4 @@
-"""See complete.md for the logic behind completing the posterior samples"""
+"""See ./md/complete.md for the logic behind completing the posterior samples"""
 import numpy as np
 from scipy.stats import invgamma, multivariate_normal
 import model

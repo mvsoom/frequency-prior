@@ -5,6 +5,7 @@ from aux import log, get_grid, get_data, get_hyperparameters
 
 runid = 0 # Can be used to disambiguate multiple runs for same arguments
 
+# See ./md/nested_sampling_options.md for the logic behind these settings
 joblibargs = {'n_jobs': -1, 'verbose': 50, 'backend': "multiprocessing"}
 samplerargs = {'nlive': 500, 'bound': 'multi', 'sample': 'rslice', 'bootstrap': 10}
 runargs = {'save_bounds': False}
