@@ -61,6 +61,7 @@ ggplot(docc[Q==5], aes(y=delta_logz)) +
 
 rs = full[, .(new, P, Q,
               best = logz == max(logz),
+              logz,
               joint_prob = normalize(exp(-(max(logz) - logz)))),
           by=.(file)]
 
