@@ -117,9 +117,21 @@ def freqspace(n, fs):
     return np.linspace(0, fs/2, n)
 
 def magnitude_spectrum(b_periodic, x, freqs):
+    """Calculate the magnitude spectrum of the impulse response
+    
+    The impulse response is a sum of decaying sinusoids which are
+    parametrized by the periodic amplitudes `b_periodic` and bandwidths
+    and frequencies contained in `x`. This function computes the analytical
+    magnitude spectrum of that sum and evaluates it at `freqs`. The
+    Fourier transform used is the same as (Eq. 1) in the [Wiki page][1].
+    
+    For an illustration on a simpler example, see ./FFT_scaling.ipynb.
+    
+        [1]: https://en.wikipedia.org/wiki/Fourier_transform
+    """
     b_periodic = b_periodic[:,None]
     x = x[:,None]
-    s = (2*np.pi*1j)*freqs[None,:] # Laplace operator variable
+    s = (2*np.pi*1j)*freqs[None,:]
     
     b_cos, b_sin = np.split(b_periodic, 2)
     bandwidth, frequency = np.split(x, 2) # Hz
@@ -128,10 +140,10 @@ def magnitude_spectrum(b_periodic, x, freqs):
     alpha = np.pi*bandwidth
     omega = 2*np.pi*frequency
     
-    # Calculate analytical Laplace transform of the periodic component
+    # Calculate analytical Fourier transform
     numerator = (alpha + s)*b_cos + omega*b_sin
     denominator = (alpha + s)**2 + omega**2
-    laplace_tf = np.sum(numerator/denominator, axis=0) # Sum over (bandwidth, frequency) pairs
+    transform = np.sum(numerator/denominator, axis=0) # Sum over (bandwidth, frequency) pairs
     
-    magnitude = np.abs(laplace_tf)
+    magnitude = np.abs(transform)
     return magnitude
