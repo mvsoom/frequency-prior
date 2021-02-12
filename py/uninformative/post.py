@@ -15,15 +15,15 @@
 
 # # Post analysis of the nested sampling runs
 #
-# Cases are ordered in terms of niceness; the nices examples are first.
+# Cases are ordered in terms of niceness; the nicest examples are first.
 #
 # ## Notes
 #
 # - The new prior helped uncover a fifth frequency. F1 has been resolved into two frequencies with overwhelming evidence. The reason we did not see this is because of non-overlapping intervals with the old prior, which precluded F2 getting near F1. We could say that the new prior allows to pick up all the vocal tract *resonancies* which are more fine grained than the canonical formants we are used to; in this example we were able to resolve F1 "doublets".
 #
-# - After running, find the "true value" of the bandwidths $B$. Then set these to fixed values and rerun analysis so we can compare differences in the prior of frequencies only.
+# - These doublets and triplets also happen in LPC and can be interpreted as "only" spectrum shaping factors. However, the fact that their bandwidths are well-behaved (e.g. around 50 or 100 Hz) points toward physical existence.
 #
-# - We could compare our prior to a range of nested sampling runs with lognormals as priors with different relative uncertainty $\rho$ and then see to roughly which value of $\rho$ our prior corresponds by comparing the information (i.e. similar information as our prior for $\rho = \rho^*$ $\rightarrow$ our prior is like $\rho^*\%$ uncertainty)
+# - After running, find the "true value" of the bandwidths $B$. Then set these to fixed values and rerun analysis so we can compare differences in the prior of frequencies only.
 
 # + active=""
 #                file  new  P Q best joint_prob
@@ -83,24 +83,14 @@ full = do('rms/arctic_a0382', True, (10,5))
 # ## Analyze non "sure-thing" files
 
 # + active=""
-#                 file  best  P Q rel_prob
-#  1: awb/arctic_a0094  TRUE  7 5       43
-#  2: awb/arctic_a0094 FALSE  8 5       37
-#  3: awb/arctic_a0094 FALSE  9 5       19
-#  7: jmk/arctic_a0067  TRUE 10 5       64
-#  8: jmk/arctic_a0067 FALSE  9 5       36
-#  9: jmk/arctic_a0067 FALSE  6 5        0
+#                 file  best  new  P Q rel_prob
+#  1: awb/arctic_a0094  TRUE TRUE  7 5       43
+#  2: awb/arctic_a0094 FALSE TRUE  8 5       37
+#  3: awb/arctic_a0094 FALSE TRUE  9 5       19
+#  7: jmk/arctic_a0067  TRUE TRUE 10 5       64
+#  8: jmk/arctic_a0067 FALSE TRUE  9 5       36
+#  9: jmk/arctic_a0067 FALSE TRUE  6 5        0
 # -
-
-# ### `awb/arctic_a0094`
-#
-# - Well-resolved B1, B2 and F1, F2
-# - Splitting of F1 and F2 into a well-resolved doublet and triplet, resp.
-# - Good glottal flow estimate
-# - Extremely high SNR
-# - Next two most probable model have `best=False`
-
-full = do("awb/arctic_a0094", True, (7,5))
 
 # ### `jmk/arctic_a0067`
 #
@@ -108,8 +98,24 @@ full = do("awb/arctic_a0094", True, (7,5))
 # - Splitting of F3 into reasonable well-resolved triplet
 # - Acceptable trend, even though `P=10`
 # - Extremely high SNR, Low PDR
-# - Next most probable model has `best=False`
+# - Next most probable model is identical but for `P=9`
 
 full = do("jmk/arctic_a0067", True, (10,5))
 
+# ### `awb/arctic_a0094`
+#
+# - Well-resolved B1, B2 and F1, F2
+# - Splitting of F1 and F2 into a well-resolved doublet and triplet, resp.
+# - Good glottal flow estimate
+# - Extremely high SNR
+# - Next most probable models have higher `P`:
+#   * `P=8`: Very similar to `P=7`
+#   * `P=9`: Trend has a low-frequency component of about 250 Hz. Model much higher uncertainty and corresponding lower information than best model. **Thus with this example we see that oscillatory behaviour of trend is penalized but probably not enough.**
 
+full = do("awb/arctic_a0094", True, (7,5))
+
+# Next most probable model
+full = do("awb/arctic_a0094", True, (8,5))
+
+# Next most probable model
+full = do("awb/arctic_a0094", True, (9,5))
