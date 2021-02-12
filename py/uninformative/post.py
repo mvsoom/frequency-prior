@@ -17,13 +17,16 @@
 #
 # Cases are ordered in terms of niceness; the nicest examples are first.
 #
-# ## Notes
+# ## Conclusions
 #
-# - The new prior helped uncover a fifth frequency. F1 has been resolved into two frequencies with overwhelming evidence. The reason we did not see this is because of non-overlapping intervals with the old prior, which precluded F2 getting near F1. We could say that the new prior allows to pick up all the vocal tract *resonancies* which are more fine grained than the canonical formants we are used to; in this example we were able to resolve F1 "doublets".
+# - As before, we always find evidence of a trend (`P > 0`)
 #
-# - These doublets and triplets also happen in LPC and can be interpreted as "only" spectrum shaping factors. However, the fact that their bandwidths are well-behaved (e.g. around 50 or 100 Hz) points toward physical existence.
+# - The new prior enables resolving frequency peaks into doublets and triplets (more general: multiplets). The reason we did not see this before (`new=False`) is because of non-overlapping intervals with the old prior, which precluded F2 getting near F1. We could say that the new prior allows to pick up all the *vocal tract resonancies* which are more fine grained than the canonical formants we are used to; in this example we were able to resolve F1 "doublets".
 #
-# - After running, find the "true value" of the bandwidths $B$. Then set these to fixed values and rerun analysis so we can compare differences in the prior of frequencies only.
+# - These doublets and triplets also happen in LPC and could be interpreted as "only" spectrum shaping factors. However, the following facts seem to point toward physical existence of these multiplets:
+#   * Their bandwidths are well-behaved (e.g. around 50 or 100 Hz); shaping formants usually have broad bandwidths (i.e. very broad peaks)
+#   * The multiplet frequencies cluster around peaks; shaping formants are typically more between peaks
+#   * The multiplet resolving behavior is quite particular to the data, both in number of split components and the formant peak which is split. For example, `jmk/arctic_a0067` has F3 split in a triplet.
 
 # + active=""
 #                file  new  P Q best joint_prob
