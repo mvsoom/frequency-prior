@@ -151,8 +151,10 @@ def analyze(
     estimates = parameter_estimates(results)
     
     print("Log Z =", logz(results))
-    print("Information =", results['information'][-1])
-    print("Estimates =", estimates)
+    print("Information (nats) =", results['information'][-1])
+    
+    print("Bandwidths estimates (Hz) =", estimates[:Q])
+    print("Frequency estimates (Hz) =", estimates[Q:])
     
     # Show nested sampling plots
     if plot: show_dyplots(results, **dyplots_kwargs)
