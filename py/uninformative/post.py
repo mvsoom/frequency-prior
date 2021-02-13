@@ -19,7 +19,7 @@
 #
 # ## Conclusions
 #
-# - As before, we always find evidence of a trend (`P > 0`)
+# - As before, we always find evidence of a trend (`P > 0`). Such low-frequency components imply that the unaltercated Fourier transform magnitude spectrum is a suboptimal estimator (Van Soom 2019a). "Unaltercated" here means without windowing, detrending, and other "ad-hoc" measures.
 #
 # - The new prior enables resolving frequency peaks into doublets and triplets (more general: multiplets). The reason we did not see this before (`new=False`) is because of non-overlapping intervals with the old prior, which precluded F2 getting near F1. We could say that the new prior allows to pick up all the *vocal tract resonancies* which are more fine grained than the canonical formants we are used to; in this example we were able to resolve F1 "doublets".
 #
