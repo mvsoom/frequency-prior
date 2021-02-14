@@ -2,10 +2,9 @@ import numpy as np
 import gvar
 import copy
 import dynesty
-from dynesty import plotting as dyplot
 from dynesty import utils as dyfunc
-import matplotlib.pyplot as plt
 
+import plot
 import driver_script
 import complete
 
@@ -94,8 +93,8 @@ def model_function_estimates(
     complete_logwts,
     order,
     data,
-    num_resample=2000,
-    num_freq=1000
+    num_resample,
+    num_freq
 ):
     samples = complete.sample_components_and_spectrum(
         complete_samples,
@@ -129,50 +128,28 @@ def resample_equal(samples, logwt, n):
     i = np.random.choice(len(weights), size=n, replace=False)
     return samples[i,:]
 
-def analyze(
+def get_analysis(
     new,
     order,
     data,
     hyper,
-    complete_analysis=True,
-    plot=True,
-    num_resample=2000,
-    num_freq=250,
-    dyplots_kwargs = {},
-    modelplots_kwargs = {},
-    spectrumplots_kwargs = {}
+    num_resample,
+    num_freq
 ):
     P, Q = order
     
-    # Get samples
+    # Get posterior samples of poles
     results = driver_script.run_nested(new, P, Q, data, hyper)
     
-    # Calculate estimates
+    # Calculate pole estimates
     estimates = parameter_estimates(results)
     
-    print("Log Z =", logz(results))
-    print("Information (nats) =", results['information'][-1])
-    
-    print("Bandwidths estimates (Hz) =", estimates[:Q])
-    print("Frequency estimates (Hz) =", estimates[Q:])
-    
-    # Show nested sampling plots
-    if plot: show_dyplots(results, **dyplots_kwargs)
-    
-    # Bail out early if possible
-    if not complete_analysis:
-        return {'results': results, 'estimates': estimates}
-    
-    # Get complete samples
+    # Get complete posterior samples (i.e. amplitudes, poles and sigma)
     complete_samples, complete_logwts = complete.complete_samples(order, data, results)
 
     # Calculate complete estimates and SNR estimates
     complete_estimates = parameter_estimates((complete_samples, complete_logwts))
     SNR, bs_SNR_pitch_periods = SNR_estimates(complete_estimates, order, data)
-    
-    print("Approximate SNR (dB) =", SNR)
-    print("Approximate amplitude SNR per pitch period (dB) =")
-    for bs in bs_SNR_pitch_periods: print(bs)
     
     # Calculate trend and periodic components using resampling
     trends, periodics, fs, spectra = model_function_estimates(
@@ -185,18 +162,16 @@ def analyze(
     )
     
     PDR = PDR_estimate(data[2], periodics)
-    print("Periodic to data power ratio PDR (dB) =", PDR)
     
-    # Plot components, model function and data
-    if plot: show_modelplots(data, trends, periodics, fs, **modelplots_kwargs)
-    
-    # Plot power spectrum of data and inferred impulse response
+    # Get power spectrum of data and posterior of power spectrum of VT impulse response
     freqs = complete.freqspace(num_freq, data[0])
-    spectrum = np.mean(spectra,axis=0) # Average spectra over pitch periods
-    
-    if plot: show_spectrumplot(data, spectrum, freqs, **spectrumplots_kwargs)
+    spectrum = np.mean(spectra, axis=0) # Average spectra over pitch periods
     
     return {
+        'new': new,
+        'order': order,
+        'data': data,
+        'hyper': hyper,
         'results': results,
         'estimates': estimates,
         'complete_samples': complete_samples,
@@ -207,123 +182,67 @@ def analyze(
         'trends': trends,
         'periodics': periodics,
         'fs': fs,
-        'PDR'
+        'PDR': PDR,
         'spectra': spectra,
         'freqs': freqs,
         'spectrum': spectrum # Power spectrum in dB averaged over pitch periods
     }
 
-def get_labels(results):
-    Q = int(results.samples.shape[1] / 2)
-    return [f"$B_{i+1}$" for i in range(Q)] + [f"$F_{i+1}$" for i in range(Q)]
+def print_analysis(a):
+    results = a['results']
+    print("Log Z =", logz(results))
+    print("Information (nats) =", results['information'][-1])
+    
+    estimates = a['estimates']
+    P, Q = a['order']; del P
+    print("Bandwidths estimates (Hz) =", estimates[:Q])
+    print("Frequency estimates (Hz) =", estimates[Q:])
+    
+    print("Approximate SNR (dB) =", a['SNR'])
+    print("Approximate amplitude SNR per pitch period (dB) =")
+    for bs in a['bs_SNR_pitch_periods']: print(bs)
+    
+    print("Periodic to data power ratio PDR (dB) =", a['PDR'])
 
-def show_dyplots(results, ylim_quantiles=(0,.99), trace_only=True):
-    if trace_only is None: return
-
-    if not trace_only: dyplot.runplot(results)
-
-    # This uses a locally modified version of dyplot.traceplot(). The ylim_quantiles
-    # are used to reject samples with a likelihood of zero, i.e. samples with
-    # formant frequencies larger than fs/2. There are other ways of dealing with this,
-    # such as resampling or sifting out samples with logl = -1e300.
-    p, _ = dyplot.traceplot(
-        results, show_titles=True, ylim_quantiles=ylim_quantiles, labels = get_labels(results)
-    )
-    p.tight_layout() # Somehow this still outputs to Jupyter lab
-
-    if not trace_only: dyplot.cornerplot(results)
-
-def show_modelplots(
+def analyze(
+    new,
+    order,
     data,
-    trends,
-    periodics,
-    fs,
-    num_posterior_samples=25,
-    offset=2,
-    figsize=(12,2)
+    hyper,
+    num_resample=2000,
+    num_freq=250,
+    dyplots_kwargs = {},
+    modelplots_kwargs = {},
+    spectrumplots_kwargs = {}
 ):
-    def ugly_hack(data, d):
-        t = data[1][0]
-        dt = t[1] - t[0]
-        return np.arange(len(d))*dt*1000 # (msec)
+    """Analyze a single (P, Q) model"""
+    a = get_analysis(new, order, data, hyper, num_resample, num_freq)
+    print_analysis(a)
     
-    d = np.concatenate(data[2])
-    t = ugly_hack(data, d)
-    trend = np.concatenate(trends)
-    periodic = np.concatenate(periodics)
-    f = np.concatenate(fs)
+    # Show nested sampling plots
+    plot.show_dyplots(a['results'], **dyplots_kwargs)
     
-    def samples(g):
-        s = [gvar.sample(g) for i in range(num_posterior_samples)]
-        return np.array(s).T
+    # Plot components, model function and data
+    plot.show_modelplots(data, a['trends'], a['periodics'], a['fs'], **modelplots_kwargs)
+    
+    # Plot power spectrum of data and inferred impulse response
+    plot.show_spectrumplot(data, a['spectrum'], a['freqs'], **spectrumplots_kwargs)
+    
+    return a
 
-    def plot_data(i):
-        plt.plot(t, d - i*offset, '--', color='black')
-
-    def plot_samples(g, i, color='black', alpha=1/num_posterior_samples):
-        plt.plot(t, samples(g) - i*offset, color=color, alpha=alpha)
-
-    width, height = figsize
-    plt.figure(figsize=(width, height*3))
-    plt.title('Data vs. posterior samples of the model function and its components')
-    plt.xlabel('time [msec]')
-    plt.ylabel('amplitude [a.u.]')
-
-    # Plot data vs. full model function
-    plot_data(0)
-    plot_samples(f, 0)
-    
-    # Plot components
-    plot_data(1)
-    plot_samples(trend, 1)
-    
-    plot_data(2)
-    plot_samples(periodic, 2)
-    
-    plt.show()
-    
-    # Plot normalized glottal flow
-    plt.figure(figsize=(width, height))
-    plt.title('Data vs. posterior samples of the "glottal flow"')
-    plt.xlabel('time [msec]')
-    plt.ylabel('amplitude [a.u.]')
-    
-    gf = np.cumsum(trend)
-    gf_mean = gvar.mean(gf)
-    scale = gf_mean.max() - gf_mean.min()
-    
-    plot_data(0)
-    plot_samples(gf/scale, 0)
-
-    plt.show()
-
-def show_spectrumplot(
+def analyze_average(
+    new,
+    Q,
     data,
-    spectrum,
-    freqs,
-    n_pad=None,
-    num_posterior_samples=25,
-    figsize=(12,4)
+    hyper,
+    P_max = 10,
+    p_cutoff = .01,
+    **analyze_kwargs
 ):
-    plt.figure(figsize=figsize)
-    plt.title('Spectrum of data vs. posterior samples of impulse response spectrum')
-    plt.xlabel('Frequency [Hz]')
-    plt.ylabel('Spectral power (dB)')
+    """Analyze models Q averaged over trend order P"""
+    def get_logz(P):
+        results = driver_script.run_nested(new, P, Q, data, hyper)
+        return gvar.mean(logz(results))
 
-    # Calculate power spectrum of data with correct (dt scaling).
-    # See ./FFT_scaling.ipynb for details.
-    d = np.concatenate(data[2])
-    dt = 1/data[0]
-    D = np.fft.rfft(d, n_pad)*dt
-    D_freq = np.fft.rfftfreq(n_pad if n_pad else len(d), dt)
-
-    plt.plot(D_freq, 20*np.log10(np.abs(D)), '--', color='black')
-    
-    # Plot posterior samples of pitch-period-averaged power spectrum (already in dB)
-    def samples(g):
-        s = [gvar.sample(g) for i in range(num_posterior_samples)]
-        return np.array(s).T
-
-    plt.plot(freqs, samples(spectrum), color='black', alpha=1/num_posterior_samples)
-    
-    plt.show()
+    lz = [get_logz(P) for P in range(0, P_max+1)]
+    return lz
