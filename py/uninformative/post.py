@@ -19,6 +19,8 @@
 #
 # ## Conclusions
 #
+# - `Q=5` dominates.
+#
 # - As before, we always find evidence of a trend (`P > 0`). Such low-frequency components imply that the unaltercated Fourier transform magnitude spectrum is a suboptimal estimator (Van Soom 2019a). "Unaltercated" here means without windowing, detrending, and other "ad-hoc" measures.
 #
 # - The new prior enables resolving frequency peaks into doublets and triplets (more general: multiplets). The reason we did not see this before (`new=False`) is because of non-overlapping intervals with the old prior, which precluded F2 getting near F1. We could say that the new prior allows to pick up all the *vocal tract resonancies* which are more fine grained than the canonical formants we are used to; in this example we were able to resolve F1 "doublets".
@@ -41,10 +43,14 @@
 import analyze
 import aux
 
-def do(file, new, order, **kwargs):
+def do(file, new, P=None, Q=None, **kwargs):
     data = aux.get_data(file, 11000)
     hyper = aux.get_hyperparameters()
-    return analyze.analyze(new, order, data, hyper, **kwargs)
+    if P is None:
+        return analyze.analyze_average(new, Q, data, hyper, **kwargs)
+    else:
+        order = (P, Q)
+        return analyze.analyze(new, order, data, hyper, **kwargs)
 
 
 # -
@@ -64,7 +70,7 @@ def do(file, new, order, **kwargs):
 # - Splitting of F1 into well-resolved doublet
 # - Good glottal flow estimates
 
-a = do('bdl/arctic_a0017', True, (5,5))
+a = do('bdl/arctic_a0017', True, Q=5)
 
 # ### `slt/arctic_b0041`
 #
@@ -72,7 +78,7 @@ a = do('bdl/arctic_a0017', True, (5,5))
 # - Splitting of F1 and F2 into well-resolved doublets
 # - Well-behaved trend
 
-a = do('slt/arctic_b0041', True, (7,5))
+a = do('slt/arctic_b0041', True, Q=5)
 
 # ### `rms/arctic_a0382`
 #
@@ -81,7 +87,7 @@ a = do('slt/arctic_b0041', True, (7,5))
 # - The trend $(P=10)$ has a strong low-frequency component of about 300 Hz. This component is also ignored (i.e. not labeled as a formant) in the best `new=False` model. It looks like we need `Q=6` or more for this data to make the best `P` smaller and to pick up this low-frequency component.
 # - PDR abnormally high; around zero dB
 
-a = do('rms/arctic_a0382', True, (10,5))
+a = do('rms/arctic_a0382', True, Q=5)
 
 # ## Analyze non "sure-thing" files
 
@@ -103,7 +109,7 @@ a = do('rms/arctic_a0382', True, (10,5))
 # - Extremely high SNR, Low PDR
 # - Next most probable model is identical but for `P=9`
 
-a = do("jmk/arctic_a0067", True, (10,5))
+a = do("jmk/arctic_a0067", True, Q=5)
 
 # ### `awb/arctic_a0094`
 #
@@ -115,10 +121,10 @@ a = do("jmk/arctic_a0067", True, (10,5))
 #   * `P=8`: Very similar to `P=7`
 #   * `P=9`: Trend has a low-frequency component of about 250 Hz. Model much higher uncertainty and corresponding lower information than best model. **Thus with this example we see that oscillatory behaviour of trend is penalized but probably not enough.**
 
-a = do("awb/arctic_a0094", True, (7,5))
+a = do("awb/arctic_a0094", True, Q=5)
 
 # Next most probable model
-a = do("awb/arctic_a0094", True, (8,5))
+a = do("awb/arctic_a0094", True, P=8, Q=5)
 
 # Next most probable model
-a = do("awb/arctic_a0094", True, (9,5))
+a = do("awb/arctic_a0094", True, P=9, Q=5)
