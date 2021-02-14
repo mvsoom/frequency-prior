@@ -13,7 +13,8 @@ runargs = {'save_bounds': False}
 def run_nested(new, P, Q, data, hyper):
     global runid, samplerargs, runargs
     
-    order = (P, Q)
+    # Coerce to ints to avoid triggering recalculations
+    order = (int(P), int(Q))
     return model.run_nested(
         new, order, data, hyper, runid, samplerargs, runargs
     )
