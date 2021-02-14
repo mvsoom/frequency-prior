@@ -3,6 +3,10 @@ import gvar
 import copy
 import dynesty
 from dynesty import utils as dyfunc
+import tabulate
+
+import joblib
+memory = joblib.Memory('cache', verbose=0)
 
 import plot
 import driver_script
@@ -23,7 +27,7 @@ def exp_and_normalize(logw):
     # We don't normalize with log Z because complete posterior samples can
     # have log densities much larger than log Z, leading to large weights.
     nw = np.exp(logw - np.max(logw))
-    nw /= sum(nw)
+    nw /= np.sum(nw)
     return nw
 
 def parameter_estimates(results_or_samples, return_gvars=True):
@@ -128,6 +132,8 @@ def resample_equal(samples, logwt, n):
     i = np.random.choice(len(weights), size=n, replace=False)
     return samples[i,:]
 
+# This function can't be cached because the cached gvars "go stale" when
+# adding them, as is done in get_analysis_average()
 def get_analysis(
     new,
     order,
@@ -136,6 +142,7 @@ def get_analysis(
     num_resample,
     num_freq
 ):
+    """Analyze a single (P, Q) model"""
     P, Q = order
     
     # Get posterior samples of poles
@@ -167,7 +174,7 @@ def get_analysis(
     freqs = complete.freqspace(num_freq, data[0])
     spectrum = np.mean(spectra, axis=0) # Average spectra over pitch periods
     
-    return {
+    a = {
         'new': new,
         'order': order,
         'data': data,
@@ -187,6 +194,7 @@ def get_analysis(
         'freqs': freqs,
         'spectrum': spectrum # Power spectrum in dB averaged over pitch periods
     }
+    return a
 
 def print_analysis(a):
     results = a['results']
@@ -204,6 +212,15 @@ def print_analysis(a):
     
     print("Periodic to data power ratio PDR (dB) =", a['PDR'])
 
+def print_analysis_average(a):
+    estimates = a['estimates']
+    Q = a['Q']
+    print("Bandwidths estimates (Hz) =", estimates[:Q])
+    print("Frequency estimates (Hz) =", estimates[Q:])
+    
+    print("Approximate SNR (dB) =", a['SNR'])
+    print("Periodic to data power ratio PDR (dB) =", a['PDR'])
+
 def analyze(
     new,
     order,
@@ -215,7 +232,6 @@ def analyze(
     modelplots_kwargs = {},
     spectrumplots_kwargs = {}
 ):
-    """Analyze a single (P, Q) model"""
     a = get_analysis(new, order, data, hyper, num_resample, num_freq)
     print_analysis(a)
     
@@ -224,11 +240,108 @@ def analyze(
     
     # Plot components, model function and data
     plot.show_modelplots(data, a['trends'], a['periodics'], a['fs'], **modelplots_kwargs)
-    
+
     # Plot power spectrum of data and inferred impulse response
     plot.show_spectrumplot(data, a['spectrum'], a['freqs'], **spectrumplots_kwargs)
     
     return a
+
+def get_significant_Ps(new, Q, data, hyper, P_max, p_cutoff):
+    def get_logz(P):
+        results = driver_script.run_nested(new, P, Q, data, hyper)
+        return logz(results)
+
+    Ps = np.arange(P_max+1)
+    lz = np.array([get_logz(P) for P in Ps])
+    
+    p = np.exp(lz - np.max(lz))
+    p /= np.sum(p)
+    keep = p > p_cutoff
+    
+    Ps = Ps[keep]
+    weights = p[keep]
+    weights /= np.sum(weights)
+
+    return list(Ps), list(weights) # Weights contain mean +/- sd
+
+def get_analysis_average(
+    new,
+    Q,
+    data,
+    hyper,
+    P_max = 10,
+    p_cutoff = .05,
+    num_resample=2000,
+    num_freq=250
+):
+    """Analyze models Q averaged over trend order P"""
+    Ps, weights = get_significant_Ps(new, Q, data, hyper, P_max, p_cutoff)
+    
+    # Build a list of significant models according to p_cutoff
+    models = {
+        P: {
+            'weight': gvar.mean(weight),
+            'a': get_analysis(new, (P, Q), data, hyper, num_resample, num_freq)
+        } for P, weight in zip(Ps, weights)
+    }
+    
+    def model_average(prop_key, i=None):
+        avg = np.array([0.]) # To be recasted
+        for model in models.values():
+            w = model['weight']
+            x = model['a'][prop_key]
+            if i is not None:
+                x = x[i]
+            
+            avg = avg + w*x
+
+        return avg
+    
+    def model_list_average(prop_key, n):
+        return [model_average(prop_key, i) for i in range(n)]
+    
+    freqs = models[Ps[0]]['a']['freqs']
+    
+    # Get number of pitch periods
+    n = len(data[1])
+    
+    a = {
+        'Ps':        Ps,
+        'Q':         Q,
+        'weights':   weights,
+        'models':    models,
+        'estimates': model_average('estimates'),
+        'SNR':       model_average('SNR'),
+        'trends':    model_list_average('trends', n),
+        'periodics': model_list_average('periodics', n),
+        'fs':        model_list_average('fs', n),
+        'PDR':       model_average('PDR'),
+        'spectra':   model_list_average('spectra', n),
+        'freqs':     freqs,
+        'spectrum':  model_average('spectrum') # Power spectrum in dB averaged over pitch periods
+    }
+    return a
+
+def average_samples(models):
+    samples, logwt = [], []
+    for model in models.values():
+        w = model['weight']
+        a = model['a']
+        samples += [a['results']['samples']]
+        logwt += [a['results']['logwt'] + np.log(w)]
+    
+    samples = np.vstack(samples)
+    logwt = np.concatenate(logwt)
+    weights = exp_and_normalize(logwt)
+    return samples, weights
+
+def print_P_table(a):
+    headers = [f'P={P}' for P in a['Ps']]
+    percents = [f'{100.*w}%' for w in a['weights']]
+    
+    t = tabulate.tabulate([percents], headers=headers, tablefmt='fancy_grid')
+    print(f"Posterior probability prob(P|Q={a['Q']},data):")
+    print(t)
 
 def analyze_average(
     new,
@@ -236,13 +349,43 @@ def analyze_average(
     data,
     hyper,
     P_max = 10,
-    p_cutoff = .01,
-    **analyze_kwargs
+    p_cutoff = .05,
+    num_resample=2000,
+    num_freq=250,
+    marginalplots_kwargs = {},
+    modelplots_kwargs = {},
+    spectrumplots_kwargs = {}
 ):
-    """Analyze models Q averaged over trend order P"""
-    def get_logz(P):
-        results = driver_script.run_nested(new, P, Q, data, hyper)
-        return gvar.mean(logz(results))
+    a = get_analysis_average(new, Q, data, hyper, P_max, p_cutoff, num_resample, num_freq)
+    
+    print_P_table(a)
+    
+    Ps = a['Ps']
+    if len(Ps) == 1:
+        # One value of P dominates: run the analysis for the MAP approximation
+        order_MAP = (Ps[0], Q)
+        a = analyze(
+            new,
+            order_MAP,
+            data,
+            hyper,
+            num_resample,
+            num_freq,
+            modelplots_kwargs,
+            spectrumplots_kwargs
+        )
+        return a
+    else:
+        print_analysis_average(a)
 
-    lz = [get_logz(P) for P in range(0, P_max+1)]
-    return lz
+        # Plot marginalized posteriors for model-averaged samples 
+        samples, weights = average_samples(a['models'])
+        plot.show_marginalplots(samples, weights, show_titles=True, **marginalplots_kwargs);
+
+        # Plot components, model function and data
+        plot.show_modelplots(data, a['trends'], a['periodics'], a['fs'], **modelplots_kwargs)
+
+        # Plot power spectrum of data and inferred impulse response
+        plot.show_spectrumplot(data, a['spectrum'], a['freqs'], **spectrumplots_kwargs)
+
+        return a
