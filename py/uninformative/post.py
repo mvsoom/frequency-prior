@@ -64,7 +64,7 @@ def do(file, new, order, **kwargs):
 # - Splitting of F1 into well-resolved doublet
 # - Good glottal flow estimates
 
-full = do('bdl/arctic_a0017', True, (5,5))
+a = do('bdl/arctic_a0017', True, (5,5))
 
 # ### `slt/arctic_b0041`
 #
@@ -72,7 +72,7 @@ full = do('bdl/arctic_a0017', True, (5,5))
 # - Splitting of F1 and F2 into well-resolved doublets
 # - Well-behaved trend
 
-full = do('slt/arctic_b0041', True, (7,5))
+a = do('slt/arctic_b0041', True, (7,5))
 
 # ### `rms/arctic_a0382`
 #
@@ -81,7 +81,7 @@ full = do('slt/arctic_b0041', True, (7,5))
 # - The trend $(P=10)$ has a strong low-frequency component of about 300 Hz. This component is also ignored (i.e. not labeled as a formant) in the best `new=False` model. It looks like we need `Q=6` or more for this data to make the best `P` smaller and to pick up this low-frequency component.
 # - PDR abnormally high; around zero dB
 
-full = do('rms/arctic_a0382', True, (10,5))
+a = do('rms/arctic_a0382', True, (10,5))
 
 # ## Analyze non "sure-thing" files
 
@@ -103,7 +103,7 @@ full = do('rms/arctic_a0382', True, (10,5))
 # - Extremely high SNR, Low PDR
 # - Next most probable model is identical but for `P=9`
 
-full = do("jmk/arctic_a0067", True, (10,5))
+a = do("jmk/arctic_a0067", True, (10,5))
 
 # ### `awb/arctic_a0094`
 #
@@ -115,10 +115,10 @@ full = do("jmk/arctic_a0067", True, (10,5))
 #   * `P=8`: Very similar to `P=7`
 #   * `P=9`: Trend has a low-frequency component of about 250 Hz. Model much higher uncertainty and corresponding lower information than best model. **Thus with this example we see that oscillatory behaviour of trend is penalized but probably not enough.**
 
-full = do("awb/arctic_a0094", True, (7,5))
+a = do("awb/arctic_a0094", True, (7,5))
 
 # Next most probable model
-full = do("awb/arctic_a0094", True, (8,5))
+a = do("awb/arctic_a0094", True, (8,5))
 
 # Next most probable model
-full = do("awb/arctic_a0094", True, (9,5))
+a = do("awb/arctic_a0094", True, (9,5))
