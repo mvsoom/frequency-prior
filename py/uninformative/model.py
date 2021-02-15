@@ -126,6 +126,11 @@ def loglike(x, order, data, hyper):
         G = eval_G(t, x, order)
         
         b_hat, chi2, rank, s = np.linalg.lstsq(G, d, rcond=None)
+        if not (rank == G.shape[1]):
+            # Parameter values in x are too close and have produced
+            # linearly dependent columns in G
+            return -np.inf
+
         logdet = 2.*sum(np.log(s))
         b_regularizer = np.dot(b_hat, b_hat)/(delta**2)
         
