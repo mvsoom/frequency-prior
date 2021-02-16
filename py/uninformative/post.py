@@ -17,9 +17,15 @@
 #
 # Cases are ordered in terms of niceness; the nicest examples are first.
 #
+# ## Model order posterior
+#
+# ![2D posterior of the model orders given `new` and file](post/model_order_posterior.png)
+#
 # ## Conclusions
 #
-# - `Q=5` dominates.
+# - `(new=True,Q=5)` dominates (100%) for every file, which enables easy model averaging. (Averaging models over $Q$ gives the problem of combining the right frequencies with each other, since the frequencies can shift anywhere; this is not a problem for the `new=False` models where the frequencies live in the intervals specified by the Jeffreys priors.)
+#
+# - In contrast, the MAP $Q$ values for the `new=False` models are between two (`awb`) to four (`bdl`) and three for the others.
 #
 # - As before, we always find evidence of a trend (`P > 0`). Such low-frequency components imply that the unaltercated Fourier transform magnitude spectrum is a suboptimal estimator (Van Soom 2019a). "Unaltercated" here means without windowing, detrending, and other "ad-hoc" measures.
 #
@@ -29,14 +35,6 @@
 #   * Their bandwidths are well-behaved (e.g. around 50 or 100 Hz); shaping formants usually have broad bandwidths (i.e. very broad peaks)
 #   * The multiplet frequencies cluster around peaks; shaping formants are typically more between peaks
 #   * The multiplet resolving behavior is quite particular to the data, both in number of split components and the formant peak which is split. For example, `jmk/arctic_a0067` has F3 split in a triplet.
-
-# + active=""
-#                file  new  P Q best joint_prob
-# 1: awb/arctic_a0094 TRUE  7 5 TRUE  0.4325568
-# 2: bdl/arctic_a0017 TRUE  5 5 TRUE  0.9999998
-# 3: jmk/arctic_a0067 TRUE 10 5 TRUE  0.6395072
-# 4: rms/arctic_a0382 TRUE 10 5 TRUE  0.9989529
-# 5: slt/arctic_b0041 TRUE  7 5 TRUE  0.9999823
 
 # +
 # %pylab inline
@@ -57,14 +55,7 @@ def do(file, new, P=None, Q=None, **kwargs):
 
 # ## Analyze "sure-thing" files
 
-# + active=""
-#                file  new  P Q best joint_prob
-# 2: bdl/arctic_a0017 TRUE  5 5 TRUE  0.9999998
-# 4: rms/arctic_a0382 TRUE 10 5 TRUE  0.9989529
-# 5: slt/arctic_b0041 TRUE  7 5 TRUE  0.9999823
-# -
-
-# ### `bdl/arctic_a0017` (aka. the golden example)
+# ### `that` (aka. the golden example)
 #
 # - Well-resolved B1-B4 and F1-F4
 # - Splitting of F1 into well-resolved doublet
@@ -72,7 +63,9 @@ def do(file, new, P=None, Q=None, **kwargs):
 
 a = do('bdl/arctic_a0017', True, Q=5)
 
-# ### `slt/arctic_b0041`
+a = do('bdl/arctic_a0017', False, Q=4)
+
+# ### `until`
 #
 # - Well-resolved B1-B3 and F1-F3
 # - Splitting of F1 and F2 into well-resolved doublets
@@ -80,7 +73,7 @@ a = do('bdl/arctic_a0017', True, Q=5)
 
 a = do('slt/arctic_b0041', True, Q=5)
 
-# ### `rms/arctic_a0382`
+# ### `little`
 #
 # - Well-resolved B1-B3 and F1-F3
 # - Splitting of F1 and F2 into doublets of which the latter is well-resolved
@@ -91,17 +84,7 @@ a = do('rms/arctic_a0382', True, Q=5)
 
 # ## Analyze non "sure-thing" files
 
-# + active=""
-#                 file  best  new  P Q rel_prob
-#  1: awb/arctic_a0094  TRUE TRUE  7 5       43
-#  2: awb/arctic_a0094 FALSE TRUE  8 5       37
-#  3: awb/arctic_a0094 FALSE TRUE  9 5       19
-#  7: jmk/arctic_a0067  TRUE TRUE 10 5       64
-#  8: jmk/arctic_a0067 FALSE TRUE  9 5       36
-#  9: jmk/arctic_a0067 FALSE TRUE  6 5        0
-# -
-
-# ### `jmk/arctic_a0067`
+# ### `you`
 #
 # - Well-resolved B1-B3 and F1-F3
 # - Splitting of F3 into reasonable well-resolved triplet
@@ -111,7 +94,7 @@ a = do('rms/arctic_a0382', True, Q=5)
 
 a = do("jmk/arctic_a0067", True, Q=5)
 
-# ### `awb/arctic_a0094`
+# ### `shore`
 #
 # - Well-resolved B1, B2 and F1, F2
 # - Splitting of F1 and F2 into a well-resolved doublet and triplet, resp.
@@ -123,8 +106,8 @@ a = do("jmk/arctic_a0067", True, Q=5)
 
 a = do("awb/arctic_a0094", True, Q=5)
 
-# Next most probable model
+# Try particular order
 a = do("awb/arctic_a0094", True, P=8, Q=5)
 
-# Next most probable model
+# Try particular order
 a = do("awb/arctic_a0094", True, P=9, Q=5)
