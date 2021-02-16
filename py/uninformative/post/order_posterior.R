@@ -3,31 +3,68 @@
 ##############################################
 source("run_stats.R")
 
+pct = function(x) round(x*100)
+pct_text = function(x) sprintf("%d﹪", pct(x))
+normalize = function(x) x/sum(x)
+
 rs = full[, .(new, P, Q,
               best = logz == max(logz),
               logz,
-              joint_prob = normalize(exp(-(max(logz) - logz)))),
-          by=.(file)]
+              joint_prob = normalize(exp(-(max(logz) - logz)))), # p(new,P,Q|vowel)
+          by=.(vowel)]
 
-# MAP per file
-# All vowels are clearly Q = 5
-rs[best==T]
+# p(new,P,Q|vowel)
+full_posterior = full[, .(new, P, Q,
+                     MAP = logz == max(logz),
+                     p = normalize(exp(-(max(logz) - logz)))),
+                 by=.(vowel)]
 
-# Top 3 per file in percent
-# Only "you" is 100% sure P = 10
-# We need averaging over P
-rs[order(-joint_prob), .SD[1:3, .(best, P, Q, rel_prob = pct(joint_prob))], key=.(file)]
+# Plot p(P, Q | new,vowel)
+posterior_PQ = full_posterior[, .(P, Q, prob=normalize(p)), key=.(vowel,new)]
 
-rs[, sum(joint_prob), key = P][, .(prob = pct(normalize(V1)))]
+ggplot(
+  posterior_PQ
+) +
+  geom_tile(aes(P, Q, fill=prob)) +
+  geom_text(aes(P, Q, label=pct(prob)), size=2, color="white") +
+  coord_equal() +
+  scale_fill_gradient2() +
+  facet_wrap(~new+vowel, nrow=2) +
+  ggtitle("p(P, Q | new, vowel) shows different patterns of the model order for the old (FALSE) and new (TRUE) priors")
 
-# Best Q values for new=False models? Between 2 and 4.
-rs_false = full[new==F, .(new, P, Q,
-                          best = logz == max(logz),
-                          logz,
-                          joint_prob = normalize(exp(-(max(logz) - logz)))),
-                by=.(file)]
+ggsave("model_order_posterior.png")
 
-rs_false[best==T]
+# Check top 3, which holds 99% of posterior mass given vowel
+# Top 3 is always (new=T,Q=5) models
+top3 = full_posterior[order(-p), .SD[1:3, .(MAP, new, P, Q, p)], key=.(vowel)]
+top3[, `prob (%)` := pct(p)]
 
-# Top 3
-rs_false[order(-joint_prob), .SD[1:3, .(best, P, Q, rel_prob = pct(joint_prob))], key=.(file)]
+top3[, sum(`prob (%)`), key=vowel]
+top3
+
+# Does the data prefer the old or new prior?
+# Answer: the new prior, by 100% to over 20 decimal places
+posterior_given_vowel = function(...) full_posterior[, .(prob = sum(p)), key=c("vowel", c(...))]
+
+posterior_given_vowel("new")
+
+ggplot(
+  posterior_given_vowel("P")
+  ) +
+  geom_col(aes(P, prob))
+
+# Find the MAP in (new, Q) dimensions
+ggplot(posterior_given_vowel("new", "Q")) +
+  geom_text(aes(new, Q, label=pct_text(prob))) +
+  facet_wrap(~vowel) +
+  ggtitle("p(new, Q | vowel) shows very accurate MAP approximation by (new=True,Q=5)")
+
+MAP_posterior = full_posterior[new==T & Q==5]
+MAP_posterior[, p := normalize(p), key=.(vowel,new,Q)]
+
+ggplot(
+  MAP_posterior
+) +
+  geom_col(aes(P, p)) +
+  facet_wrap(~vowel) +
+  ggtitle("p(P | new=True, Q=5, vowel)")
