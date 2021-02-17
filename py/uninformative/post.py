@@ -19,7 +19,11 @@
 #
 # ## Model order posterior
 #
-# ![2D posterior of the model orders given `new` and file](post/model_order_posterior.png)
+# <img src="post/model_order_posterior.png" alt="2D posterior of the model orders given `new` and file" style="height: 600px;"/>
+#
+# ## Trend order posterior
+#
+# <img src="post/trend_order_posterior.png" style="height: 400px;"/>
 #
 # ## Conclusions
 #
@@ -34,12 +38,13 @@
 # - These doublets and triplets also happen in LPC and could be interpreted as "only" spectrum shaping factors. However, the following facts seem to point toward physical existence of these multiplets:
 #   * Their bandwidths are well-behaved (e.g. around 50 or 100 Hz); shaping formants usually have broad bandwidths (i.e. very broad peaks)
 #   * The multiplet frequencies cluster around peaks; shaping formants are typically more between peaks
-#   * The multiplet resolving behavior is quite particular to the data, both in number of split components and the formant peak which is split. For example, `jmk/arctic_a0067` has F3 split in a triplet.
+#   * The multiplet resolving behavior is quite particular to the data, both in number of split components and the formant peak which is split. For example, `jmk/arctic_a0067` has F2 split in a triplet.
 
 # +
 # %pylab inline
 import analyze
 import aux
+from plot import show_residuals
 
 def do(file, new, P=None, Q=None, **kwargs):
     data = aux.get_data(file, 11000)
@@ -63,8 +68,6 @@ def do(file, new, P=None, Q=None, **kwargs):
 
 a = do('bdl/arctic_a0017', True, Q=5)
 
-a = do('bdl/arctic_a0017', False, Q=4)
-
 # ### `until`
 #
 # - Well-resolved B1-B3 and F1-F3
@@ -78,7 +81,7 @@ a = do('slt/arctic_b0041', True, Q=5)
 # - Well-resolved B1-B3 and F1-F3
 # - Splitting of F1 and F2 into doublets of which the latter is well-resolved
 # - The trend $(P=10)$ has a strong low-frequency component of about 300 Hz. This component is also ignored (i.e. not labeled as a formant) in the best `new=False` model. It looks like we need `Q=6` or more for this data to make the best `P` smaller and to pick up this low-frequency component.
-# - PDR abnormally high; around zero dB
+# - PDR abnormally high; around zero dB (which is similar to what VTR models can achieve)
 
 a = do('rms/arctic_a0382', True, Q=5)
 
@@ -87,7 +90,7 @@ a = do('rms/arctic_a0382', True, Q=5)
 # ### `you`
 #
 # - Well-resolved B1-B3 and F1-F3
-# - Splitting of F3 into reasonable well-resolved triplet
+# - Splitting of F2 into reasonable well-resolved triplet
 # - Acceptable trend, even though `P=10`
 # - Extremely high SNR, Low PDR
 # - Next most probable model is identical but for `P=9`

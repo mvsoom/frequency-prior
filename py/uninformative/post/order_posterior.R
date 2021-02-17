@@ -51,7 +51,10 @@ posterior_given_vowel("new")
 ggplot(
   posterior_given_vowel("P")
   ) +
-  geom_col(aes(P, prob))
+  geom_col(aes(P, normalize(prob))) +
+  ggtitle("Posterior probability of the trend order")
+
+ggsave("trend_order_posterior.png")
 
 # Find the MAP in (new, Q) dimensions
 ggplot(posterior_given_vowel("new", "Q")) +
