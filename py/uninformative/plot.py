@@ -21,7 +21,8 @@ def show_dyplots(results, ylim_quantiles=(0,.99), trace_only=True):
     p, _ = dyplot.traceplot(
         results, show_titles=True, ylim_quantiles=ylim_quantiles, labels = _get_labels(Q)
     )
-    p.tight_layout() # Somehow this still outputs to Jupyter lab
+    p.tight_layout()
+    p.show()
 
     if not trace_only: dyplot.cornerplot(results)
 
