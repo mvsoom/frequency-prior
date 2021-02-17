@@ -198,28 +198,31 @@ def get_analysis(
 
 def print_analysis(a):
     results = a['results']
+
     print("Log Z =", logz(results))
     print("Information (nats) =", results['information'][-1])
-    
-    estimates = a['estimates']
-    P, Q = a['order']; del P
-    print("Bandwidths estimates (Hz) =", estimates[:Q])
-    print("Frequency estimates (Hz) =", estimates[Q:])
-    
+
     print("Approximate SNR (dB) =", a['SNR'])
+    print("Periodic to data power ratio PDR (dB) =", a['PDR'])
+    
+    print_pole_table(a['estimates'])
+    
     print("Approximate amplitude SNR per pitch period (dB) =")
     for bs in a['bs_SNR_pitch_periods']: print(bs)
+
+def print_pole_table(estimates):
+    bandwidths, frequencies = np.split(estimates, 2)
+    headers = 1 + np.arange(len(bandwidths))
     
-    print("Periodic to data power ratio PDR (dB) =", a['PDR'])
+    t = tabulate.tabulate([bandwidths, frequencies], headers=headers, tablefmt='fancy_grid')
+    print("Bandwidths and frequency estimates (Hz):")
+    print(t)
 
 def print_analysis_average(a):
-    estimates = a['estimates']
-    Q = a['Q']
-    print("Bandwidths estimates (Hz) =", estimates[:Q])
-    print("Frequency estimates (Hz) =", estimates[Q:])
-    
     print("Approximate SNR (dB) =", a['SNR'])
     print("Periodic to data power ratio PDR (dB) =", a['PDR'])
+    
+    print_pole_table(a['estimates'])
 
 def analyze(
     new,
