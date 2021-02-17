@@ -284,3 +284,19 @@ def show_marginalplots(
 
     fig.tight_layout()
     return fig, axes
+
+def show_residuals(a, n=5):
+    d = np.concatenate(a['data'][2])
+    f = np.concatenate(a['fs'])
+    sigma = gvar.mean(a['complete_estimates'][-1])
+    e = (d - f)/sigma
+
+    plt.figure(figsize=(10,n))
+    plt.suptitle("Which one is true Gaussian noise?")
+    i = randint(2)
+    plt.subplot(1,2,1+i)
+    for i in range(n): plt.plot(i+gvar.sample(e)/n)
+
+    plt.subplot(1,2, 1+int(not i))
+    for i in range(n): plt.plot(i+randn(len(d))/n)
+    plt.show()
