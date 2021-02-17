@@ -245,7 +245,7 @@ def analyze(
     plot.show_modelplots(data, a['trends'], a['periodics'], a['fs'], **modelplots_kwargs)
 
     # Plot power spectrum of data and inferred impulse response
-    plot.show_spectrumplot(data, a['spectrum'], a['freqs'], **spectrumplots_kwargs)
+    plot.show_spectrumplot(data, a['spectrum'], a['freqs'], a['estimates'], **spectrumplots_kwargs)
     
     return a
 
@@ -389,6 +389,6 @@ def analyze_average(
         plot.show_modelplots(data, a['trends'], a['periodics'], a['fs'], **modelplots_kwargs)
 
         # Plot power spectrum of data and inferred impulse response
-        plot.show_spectrumplot(data, a['spectrum'], a['freqs'], **spectrumplots_kwargs)
+        plot.show_spectrumplot(data, a['spectrum'], a['freqs'], a['estimates'], **spectrumplots_kwargs)
 
         return a

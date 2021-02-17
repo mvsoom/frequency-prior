@@ -93,9 +93,11 @@ def show_spectrumplot(
     data,
     spectrum,
     freqs,
+    estimates=None,
     n_pad=None,
     num_posterior_samples=25,
-    figsize=(12,4)
+    figsize=(12,4),
+    estimate_offset=5
 ):
     plt.figure(figsize=figsize)
     plt.title('Spectrum of data vs. posterior samples of impulse response spectrum')
@@ -118,6 +120,14 @@ def show_spectrumplot(
 
     plt.plot(freqs, samples(spectrum), color='black', alpha=1/num_posterior_samples)
     
+    if estimates is not None:
+        _, pole_freqs = np.split(estimates, 2)
+        baseline = np.mean(gvar.mean(spectrum))
+        
+        for i, x in enumerate(pole_freqs):
+            y = baseline - i*estimate_offset
+            plt.errorbar(gvar.mean(x), y, xerr=3*gvar.sdev(x), fmt='|')
+
     plt.show()
 
 def show_marginalplots(
