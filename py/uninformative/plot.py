@@ -293,10 +293,10 @@ def show_residuals(a, n=5):
 
     plt.figure(figsize=(10,n))
     plt.suptitle("Which one is true Gaussian noise?")
-    i = randint(2)
+    i = np.random.randint(2)
     plt.subplot(1,2,1+i)
     for i in range(n): plt.plot(i+gvar.sample(e)/n)
 
     plt.subplot(1,2, 1+int(not i))
-    for i in range(n): plt.plot(i+randn(len(d))/n)
+    for i in range(n): plt.plot(i+np.random.randn(len(d))/n)
     plt.show()
