@@ -371,8 +371,8 @@ def analyze_average(
             hyper,
             num_resample,
             num_freq,
-            modelplots_kwargs,
-            spectrumplots_kwargs
+            modelplots_kwargs=modelplots_kwargs,
+            spectrumplots_kwargs=spectrumplots_kwargs
         )
         return a
     else:
