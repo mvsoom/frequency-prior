@@ -112,6 +112,22 @@ def contains_alias(x, order, fs):
     f = x[Q:]
     return np.any(f >= fs/2)
 
+class DeficientRank(Exception):
+    """
+    Occurs in lstsq() when a pair of parameter values in x are too close
+    in value and have produced linearly dependent columns in G
+    """
+    pass
+
+def lstsq(G, d):
+    b_hat, chi2, rank, s = np.linalg.lstsq(G, d, rcond=None)
+    if not (rank == G.shape[1]):
+        raise DeficientRank
+    else:
+        chi2 = float(chi2)
+        logdet = 2.*sum(np.log(s))
+        return b_hat, chi2, logdet
+
 def loglike(x, order, data, hyper):
     if contains_alias(x, order, data[0]):
         return -np.inf
@@ -125,16 +141,11 @@ def loglike(x, order, data, hyper):
     for (t, d) in zip(data[1], data[2]):
         G = eval_G(t, x, order)
         
-        b_hat, chi2, rank, s = np.linalg.lstsq(G, d, rcond=None)
-        if not (rank == G.shape[1]):
-            # Parameter values in x are too close and have produced
-            # linearly dependent columns in G
-            return -np.inf
-
-        logdet = 2.*sum(np.log(s))
-        b_regularizer = np.dot(b_hat, b_hat)/(delta**2)
+        try: b_hat, chi2, logdet = lstsq(G, d)
+        except DeficientRank: return -np.inf
         
-        chi2_total += float(chi2)
+        b_regularizer = np.dot(b_hat, b_hat)/(delta**2)
+        chi2_total += chi2
         logl += -logdet/2 - b_regularizer/2
     
     logl += logc - nu/2*np.log(chi2_total)

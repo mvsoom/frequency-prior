@@ -34,19 +34,23 @@ def complete_samples(order, data, results, n_jobs=-1):
     samples, logwt = results.samples, results.logwt
     nu, _ = model.order_factors(order, data, np.nan)
     
+    from model import DeficientRank
+    
     def complete_sample(x, lw, beef=1e-6):
         b_hats, gs, chi2s = [], [], []
 
         for (t, d) in zip(data[1], data[2]):
             G = model.eval_G(t, x, order)
-
-            b_hat, chi2, rank, s = np.linalg.lstsq(G, d, rcond=None)
+            
+            try: b_hat, chi2, logdet = model.lstsq(G, d)
+            except DeficientRank: return DeficientRank
+            
             g = G.T @ G
             g[np.diag_indices_from(g)] += beef
 
             b_hats += [b_hat]
             gs += [g]
-            chi2s += [float(chi2)]
+            chi2s += [chi2]
         
         sigma, lp = sample_sigma(nu/2, np.sum(chi2s)/2)
         bs, lqs = sample_bs(b_hats, gs, sigma)
@@ -60,6 +64,8 @@ def complete_samples(order, data, results, n_jobs=-1):
         zipped = parallel(
             joblib.delayed(complete_sample)(x, lw) for x, lw in zip(samples, logwt)
         )
+    
+    zipped = [z for z in zipped if z is not DeficientRank]
 
     complete_samples, complete_logwts = zip(*zipped)
     return np.array(complete_samples), np.array(complete_logwts)
