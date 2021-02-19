@@ -27,6 +27,8 @@
 #
 # ## Conclusions
 #
+# - Our prior for formants is so uninformative that it uncovers more general vocal tract resonances, which depending on the application may be a blessing or a nuisance. The splitting of peaks into doublets and triplets is also seen in Bretthorst (1988) and may indicate physical effects; or it could be artifacts stemming from inappropriate assumptions such as Lorentzian decay (as implied by the assumed LTI system theory).
+#
 # - `(new=True,Q=5)` dominates (100%) for every file, which enables easy model averaging. (Averaging models over $Q$ gives the problem of combining the right frequencies with each other, since the frequencies can shift anywhere; this is not a problem for the `new=False` models where the frequencies live in the intervals specified by the Jeffreys priors.)
 #
 # - In contrast, the MAP $Q$ values for the `new=False` models are between two (`awb`) to four (`bdl`) and three for the others.
