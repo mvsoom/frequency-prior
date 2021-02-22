@@ -13,7 +13,13 @@
 #     name: python3
 # ---
 
-# # Informative case: moment density estimation on decoupled $(u_j$
+# # Informative case: test moment density estimation on decoupled $u_j$
+#
+# ----
+#
+# **Note:** this is a test using the *complete* data, not only the male utterances. We use the `maxentropy` Python library.
+#
+# ----
 #
 # Conclusion: works well. $K = 2$ moments $(<u_1>,<u_1^2>)$ suffice to capture the marginal $p(u_1|I_K)$. $K = 4$ performs reasonably well for $u_2$. $u_3$ is harder, $K = 12$ is needed to get the bimodal behavior and is the maximum value of $K$ that will return meaningfull distributions.
 #
@@ -25,7 +31,7 @@
 #
 # - Don't forget to add invariant measure $m(\boldsymbol u)$ for $u_j$, $j > 1$. **Update:** this is very likely not necessary (but still need to double check). Since the $m(\boldsymbol u)$ is separable and just induces a shift in the Lagrange multiplier of the first moment constraint, we can just solve the problem assuming $m(u_j) \propto 1$, yielding a $\alpha_j^{(1)}$, and transform this to $\lambda_j^{(1)} = \alpha_j^{(1)} - c$ for the original problem with $m(u_j) (\propto \exp(c u_j)$.
 #
-# - (So we actually could use Bretthorst's program to get the multipliers to see if it can do better and to get a defensible order.)
+# - So we actually could use Bretthorst's program to get the multipliers to see if it can do better and to get a defensible order. **Update:** this is indeed possible and gives better results.
 #
 # - This package can deal with correlated features $F(\boldsymbol u)$. Actually it can handle 100s of parameters or more with high dimensionality of $\boldsymbol u$. Currently I choose dense matrix formant and the Powell method for optimization, which is robust in small problems.
 #
