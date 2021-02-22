@@ -1,0 +1,5 @@
+data source                      := loaded from file
+source data file name            := /home/marnix/WRK/proj/formant-prior/research/py/informative/bretthorst/u3.ascii
+date                             := 22-Feb-2021 17:33:06
+number of columns                := 2
+number of rows                   := 660
