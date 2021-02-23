@@ -21,9 +21,13 @@
 #
 # ----
 #
-# We find the Lagrange multipliers describing the distributions for the decoupled $u_j$ variables using Bretthorst's program and report the results here.
+# We find the Lagrange multipliers describing the distributions for the decoupled $u_j$ variables using Bretthorst's program and report the results here. We also write out the `uXXX_icdf.grid` files required for sampling from these informative priors.
 #
-# Although Bretthorst's program cannot deal with an invariant measure, because ours is linear in the variables it does not make a difference -- we simply need to subtract constants from the inferred $\lambda$ values when converted to ordinary poly basis (see below).
+# > Although Bretthorst's program cannot deal with an invariant measure, because ours is linear in the variables it does not make a difference -- we simply need to subtract constants from the inferred $\lambda$ values when converted to ordinary poly basis (see below).
+#
+# **Update:** On second thought, this might be incorrect, since the expression is $\sum p_k \log p_k/m_k \rightarrow \sum p_k \log q_k$ which is not in the correct form. So we might have to use the `maxentropy` library after all, with:
+# - Legendre polynomials as moment functions instead of ordinary polynomials
+# - Fixed value of $J$: we already know this from these results, which we can view as an approximation (i.e. without invariant measure) to the real results.
 #
 # ## Note on implementation
 #
@@ -31,7 +35,7 @@
 #
 # This means that we have to use the Legendre basis to calculate the ME pdf, as is done in `do()` below. We can convert to ordinary polynomial basis $(x, x^2, x^3, \cdots)$ easily.
 #
-# Note that the invariant measure is given in the ordinary basis, e. g. $\exp\{2s + t}$, so we need to convert to this basis to give the proper results.
+# Note that the invariant measure is given in the ordinary basis, e. g. $\exp\{2s + t\}$, so we need to convert to this basis to give the proper results.
 #
 # ## Note on the ME pdf domain
 #
@@ -85,6 +89,11 @@ def do(name, m, u_max=None, n=1000, num_samples=10000, lambdas=None):
     
     p = q/Z
     pcdf = qcdf/Z
+    pcdf[0] = 0.
+    
+    # Write out inverse cdf points
+    icdf_grid = np.vstack([pcdf, x]).T
+    np.savetxt(f'{name}_icdf.grid', icdf_grid)
     
     # Calculate inverse cdf for sampling
     icdf = lambda v: np.interp(v, pcdf, x)
@@ -142,3 +151,6 @@ Lagrange Multiplier 5               2.42291E+00    2.14912E-01    2.40688E+00
 lambdas = get_lambdas(report, 5)
 
 do("u3", 5, lambdas=lambdas)
+# -
+
+
