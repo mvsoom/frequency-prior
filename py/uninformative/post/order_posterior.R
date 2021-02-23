@@ -3,22 +3,6 @@
 ##############################################
 source("run_stats.R")
 
-pct = function(x) round(x*100)
-pct_text = function(x) sprintf("%d﹪", pct(x))
-normalize = function(x) x/sum(x)
-
-rs = full[, .(new, P, Q,
-              best = logz == max(logz),
-              logz,
-              joint_prob = normalize(exp(-(max(logz) - logz)))), # p(new,P,Q|vowel)
-          by=.(vowel)]
-
-# p(new,P,Q|vowel)
-full_posterior = full[, .(new, P, Q,
-                     MAP = logz == max(logz),
-                     p = normalize(exp(-(max(logz) - logz)))),
-                 by=.(vowel)]
-
 # Plot p(P, Q | new,vowel)
 posterior_PQ = full_posterior[, .(P, Q, prob=normalize(p)), key=.(vowel,new)]
 

@@ -41,6 +41,8 @@
 #   * Their bandwidths are well-behaved (e.g. around 50 or 100 Hz); shaping formants usually have broad bandwidths (i.e. very broad peaks)
 #   * The multiplet frequencies cluster around peaks; shaping formants are typically more between peaks
 #   * The multiplet resolving behavior is quite particular to the data, both in number of split components and the formant peak which is split. For example, `jmk/arctic_a0067` has F2 split in a triplet.
+#   
+# - Ways to turn the model into a *formant* rather than a *vocal tract resonance* estimator is allowing different decay modes (as in Bretthorst 1988), which can model broad peaks. 
 
 # +
 # %pylab inline
