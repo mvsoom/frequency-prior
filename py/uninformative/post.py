@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -42,17 +43,18 @@
 #   * The multiplet frequencies cluster around peaks; shaping formants are typically more between peaks
 #   * The multiplet resolving behavior is quite particular to the data, both in number of split components and the formant peak which is split. For example, `jmk/arctic_a0067` has F2 split in a triplet.
 #   
-# - Ways to turn the model into a *formant* rather than a *vocal tract resonance* estimator is allowing different decay modes (as in Bretthorst 1988), which can model broad peaks. 
+#   
+# - Ways to turn the model into a *formant* rather than a *vocal tract resonance* estimator is allowing different decay modes (as in Bretthorst 1988), which can model broad peaks. Another way is using ad-hoc peak picking and descending -3 dB from the peak for the bandwidth estimate $B$. Since we can *sample* the posterior power spectrum and calculate $B$ in this way for each estimate, errorbars on $B$ *can* be obtained!
 
 # +
 # %pylab inline
 import analyze
-import aux
+from hyper import get_data, get_hyperparameters
 from plot import show_residuals
 
 def do(file, new, P=None, Q=None, **kwargs):
-    data = aux.get_data(file, 11000)
-    hyper = aux.get_hyperparameters()
+    data = get_data(file, 11000)
+    hyper = get_hyperparameters()
     if P is None:
         return analyze.analyze_average(new, Q, data, hyper, **kwargs)
     else:
@@ -69,8 +71,15 @@ def do(file, new, P=None, Q=None, **kwargs):
 # - Well-resolved B1-B4 and F1-F4
 # - Splitting of F1 into well-resolved doublet
 # - Good glottal flow estimates
+#
+# Old prior:
+#
+# - No F1 doublet: just 4 formants
+# - Mode hopping between F2 and F3, which upsets mean ± std estimates.
 
 a = do('bdl/arctic_a0017', True, Q=5)
+
+a = do('bdl/arctic_a0017', False, Q=4)
 
 # ### `until`
 #
@@ -79,6 +88,8 @@ a = do('bdl/arctic_a0017', True, Q=5)
 # - Well-behaved trend
 
 a = do('slt/arctic_b0041', True, Q=5)
+
+a = do('slt/arctic_b0041', False, Q=3)
 
 # ### `little`
 #

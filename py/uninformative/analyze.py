@@ -11,6 +11,7 @@ memory = joblib.Memory('cache', verbose=0)
 import plot
 import driver_script
 import complete
+import formant
 
 def logz(results):
     lz = results['logz'][-1]
@@ -148,7 +149,7 @@ def get_analysis(
     # Get posterior samples of poles
     results = driver_script.run_nested(new, P, Q, data, hyper)
     
-    # Calculate pole estimates
+    # Calculate VTR estimates
     estimates = parameter_estimates(results)
     
     # Get complete posterior samples (i.e. amplitudes, poles and sigma)
@@ -205,14 +206,20 @@ def print_analysis(a):
     print("Approximate SNR (dB) =", a['SNR'])
     print("Periodic to data power ratio PDR (dB) =", a['PDR'])
     
-    print_pole_table(a['estimates'])
+    print_pole_table(a['estimates'], 'R')
     
     print("Approximate amplitude SNR per pitch period (dB) =")
     for bs in a['bs_SNR_pitch_periods']: print(bs)
+    
+    print_formants(a)
 
-def print_pole_table(estimates):
+def print_formants(a):
+    estimates = formant.estimate_formants(a['freqs'], a['spectrum'])
+    print_pole_table(estimates, 'F')
+
+def print_pole_table(estimates, symbol=''):
     bandwidths, frequencies = np.split(estimates, 2)
-    headers = 1 + np.arange(len(bandwidths))
+    headers = [f'{symbol}{i}' for i in (1 + np.arange(len(bandwidths)))]
     
     t = tabulate.tabulate([bandwidths, frequencies], headers=headers, tablefmt='fancy_grid')
     print("Bandwidths and frequency estimates (Hz):")
@@ -222,7 +229,9 @@ def print_analysis_average(a):
     print("Approximate SNR (dB) =", a['SNR'])
     print("Periodic to data power ratio PDR (dB) =", a['PDR'])
     
-    print_pole_table(a['estimates'])
+    print_pole_table(a['estimates'], 'R')
+    
+    formant.print_formants(a)
 
 def analyze(
     new,
