@@ -2,7 +2,7 @@ import sys
 import csv
 import model
 import driver_script
-import aux
+from hyper import get_grid, get_data, get_hyperparameters
 from aux import log
 
 output_file = "post/run_stats.csv"
@@ -51,9 +51,9 @@ if __name__ == "__main__":
     for input_file in sys.argv[1:]:
         log("Processing", input_file=input_file, output_file=output_file)
         
-        grid = aux.get_grid(10, 5)
-        data = aux.get_data(input_file, 11000)
-        hyper = aux.get_hyperparameters()
+        grid = get_grid(10, 5)
+        data = get_data(input_file, 11000)
+        hyper = get_hyperparameters()
         
         for (new, P, Q) in grid:
             results = driver_script.run_nested(new, P, Q, data, hyper)

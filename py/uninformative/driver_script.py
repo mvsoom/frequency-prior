@@ -1,7 +1,8 @@
 import sys
 import joblib
 import model
-from aux import log, get_grid, get_data, get_hyperparameters
+from hyper import get_grid, get_data, get_hyperparameters
+from aux import log
 
 runid = 0 # Can be used to disambiguate multiple runs for same arguments
 

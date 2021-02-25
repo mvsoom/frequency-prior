@@ -17,10 +17,10 @@
 # +
 # %pylab inline
 
-import aux
+import hyper
 
 def show(file):
-    fs, ts, ds = aux.get_data(file, 11000)
+    fs, ts, ds = hyper.get_data(file, 11000)
     d = hstack(ds)
     t = arange(len(d))/fs # sec
     plot(t, d)

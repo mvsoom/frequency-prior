@@ -2,7 +2,9 @@ import numpy as np
 from dynesty import plotting as dyplot
 from dynesty import utils as dyfunc
 import matplotlib.pyplot as plt
+
 import gvar
+from aux import sample_gvar
 
 def _get_labels(Q):
     return [f"$B_{{{i+1}}}$" for i in range(Q)] + [f"$F_{{{i+1}}}$" for i in range(Q)]
@@ -47,8 +49,7 @@ def show_modelplots(
     f = np.concatenate(fs)
     
     def samples(g):
-        s = [gvar.sample(g) for i in range(num_posterior_samples)]
-        return np.array(s).T
+        return sample_gvar(g, num_posterior_samples).T
 
     def plot_data(i):
         plt.plot(t, d - i*offset, '--', color='black')
@@ -116,8 +117,7 @@ def show_spectrumplot(
     
     # Plot posterior samples of pitch-period-averaged power spectrum (already in dB)
     def samples(g):
-        s = [gvar.sample(g) for i in range(num_posterior_samples)]
-        return np.array(s).T
+        return sample_gvar(g, num_posterior_samples).T
 
     plt.plot(freqs, samples(spectrum), color='black', alpha=1/num_posterior_samples)
     
