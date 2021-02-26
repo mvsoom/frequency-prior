@@ -231,7 +231,7 @@ def print_analysis_average(a):
     
     print_pole_table(a['estimates'], 'R')
     
-    formant.print_formants(a)
+    print_formants(a)
 
 def analyze(
     new,
