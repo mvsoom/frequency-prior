@@ -1,12 +1,16 @@
 import numpy as np
-import band_bounds as bandwidths
-import freq_bounds as frequencies
 from product import product
 import arctic
 
-def get_data(file, resample):
+P_max = 10
+Q_max = 12
+resample_rate = 13000
+
+def get_data(file):
+    global resample_rate
+
     fs0, fs, ts, ds, _ = arctic.load_arctic_file(
-        f'arctic/{file}.wav', f'arctic/{file}.marks', resample
+        f'arctic/{file}.wav', f'arctic/{file}.marks', resample_rate
     )
 
     ts = [t/fs for t in ts] # Give units [sec]
@@ -14,8 +18,10 @@ def get_data(file, resample):
     data = (fs, ts, ds)
     return data
 
-def get_grid(P_max, Q_max):
-    new = (False, True)
+def get_grid():
+    global P_max, Q_max
+
+    new = (True,)
     Ps = range(0, P_max+1)
     Qs = range(1, Q_max+1)
 
@@ -25,13 +31,15 @@ def get_grid(P_max, Q_max):
 def get_hyperparameters():
     # Note that the model clips all frequencies >= fs/2, so we do not
     # have to take that into account in the frequency bounds.
+    global Q_max
+
     bounds = {
-        'b': bandwidths.bounds(),
-        'f': frequencies.bounds()
+        'b': [(20.,)*Q_max, (500.,)*Q_max], # All bandwidths in [20, 500]
+        'f': None
     }
 
-    x0 = bounds['f'][0][0] # Lower bound of F1
-    Ex = np.array([500., 1000., 1500., 2000., 2500.]) # Schwa model
+    x0 = 200.
+    Ex = 500.*np.arange(1, Q_max+1)  # Schwa model
     F = [x0, *Ex]
     
     delta = 1.

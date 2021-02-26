@@ -14,17 +14,17 @@
 #     name: python3
 # ---
 
-# # Post analysis of the nested sampling runs
+# # Post analysis of comparison of old and new uninformative prior
 #
 # Cases are ordered in terms of niceness; the nicest examples are first.
 #
 # ## Model order posterior
 #
-# <img src="post/model_order_posterior.png" alt="2D posterior of the model orders given `new` and file" style="height: 600px;"/>
+# <img src="post/model_order_posterior_cmp.png" alt="2D posterior of the model orders given `new` and file" style="height: 600px;"/>
 #
 # ## Trend order posterior
 #
-# <img src="post/trend_order_posterior.png" style="height: 400px;"/>
+# <img src="post/trend_order_posterior_cmp.png" style="height: 400px;"/>
 #
 # ## Conclusions
 #
@@ -57,11 +57,11 @@
 # +
 # %pylab inline
 import analyze
-from hyper import get_data, get_hyperparameters
+from hyper_cmp import get_data, get_hyperparameters
 from plot import show_residuals
 
 def do(file, new, P=None, Q=None, **kwargs):
-    data = get_data(file, 11000)
+    data = get_data(file)
     hyper = get_hyperparameters()
     if P is None:
         return analyze.analyze_average(new, Q, data, hyper, **kwargs)

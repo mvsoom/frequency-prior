@@ -9,7 +9,7 @@ source("run_stats.R")
 # (log L)_max and log W (i.e. Occam factor). Better to just compare
 # the log Z values as their errors should be smaller due to the
 # averaging.
-occ = full[, .(logw = logz - logl, logl, logz), key=.(vowel, P, Q, new)]
+occ = full_cmp[, .(logw = logz - logl, logl, logz), key=.(vowel, P, Q, new)]
 
 docc = occ[, .(
   delta_logw = .SD[new==T, logw] - .SD[new==F, logw],

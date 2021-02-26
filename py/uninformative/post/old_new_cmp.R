@@ -4,7 +4,7 @@
 source("run_stats.R")
 
 # p(P,Q | vowel)
-PQ_posterior = full_posterior[, .(prob = sum(p)), key = .(vowel, P, Q)]
+PQ_posterior = full_posterior_cmp[, .(prob = sum(p)), key = .(vowel, P, Q)]
 
 ggplot(
   PQ_posterior
@@ -19,8 +19,8 @@ ggplot(
 ######################################################
 
 # Differences are (property value of new model) - (property value of old model)
-setkey(full, "vowel", "P", "Q", "new")
-diff = full[, .(
+setkey(full_cmp, "vowel", "P", "Q", "new")
+diff = full_cmp[, .(
   d_niter = diff(niter),
   d_logl = diff(logl),
   d_logz = diff(logz),
@@ -60,7 +60,7 @@ ggplot(diff, aes(d_logz, d_information)) +
 ############################################
 
 # Get the MAP models given new to compare their performance
-MAP_new = full[, .(P, Q,
+MAP_new = full_cmp[, .(P, Q,
                    best = logz == max(logz),
                    logl,
                    logz,

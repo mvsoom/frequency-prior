@@ -1,7 +1,7 @@
 import sys
 import joblib
 import model
-from hyper import get_grid, get_data, get_hyperparameters
+import importlib
 from aux import log
 
 runid = 0 # Can be used to disambiguate multiple runs for same arguments
@@ -30,11 +30,14 @@ def driver(new, P, Q, data, hyper):
 
 if __name__ == "__main__":
     input_file = sys.argv[1]
-    log("Started", input_file=input_file)
+    hyper_file = sys.argv[2]
+    hyper_module = importlib.import_module(hyper_file)
     
-    grid = get_grid(10, 5)
-    data = get_data(input_file, 11000)
-    hyper = get_hyperparameters()
+    log("Started", input_file=input_file, hyper_file=hyper_file)
+    
+    grid = hyper_module.get_grid()
+    data = hyper_module.get_data(input_file)
+    hyper = hyper_module.get_hyperparameters()
 
     with joblib.Parallel(**joblibargs) as parallel:
         parallel(
@@ -43,4 +46,4 @@ if __name__ == "__main__":
             ) for (new, P, Q) in grid
         )
 
-    log("Finished", input_file=input_file)
+    log("Finished", input_file=input_file, hyper_file=hyper_file)

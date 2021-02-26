@@ -41,15 +41,14 @@ levels(full$vowel) <- vowels
 full[, `:=`(new = new == "True")]
 full$P = ordered(full$P)
 full$Q = ordered(full$Q)
+full$hyperfile = as.factor(full$hyperfile)
 
-rs = full[, .(new, P, Q,
-              best = logz == max(logz),
-              logz,
-              joint_prob = normalize(exp(-(max(logz) - logz)))), # p(new,P,Q|vowel)
-          by=.(vowel)]
+full_cmp = full[hyperfile == "hyper_cmp"]
+#full_free = full[hyperfile == "hyper_free"]
+full = NULL
 
 # p(new,P,Q|vowel)
-full_posterior = full[, .(new, P, Q,
-                          MAP = logz == max(logz),
-                          p = normalize(exp(-(max(logz) - logz)))),
-                      by=.(vowel)]
+full_posterior_cmp = full_cmp[, .(new, P, Q,
+                              MAP = logz == max(logz),
+                              p = normalize(exp(-(max(logz) - logz)))),
+                              by=.(vowel)]
