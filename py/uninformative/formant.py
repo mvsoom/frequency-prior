@@ -53,7 +53,7 @@ def estimate_formants(
     n_samples = 200,
     df_upsample = 1., # Hz
     freq_bounds = (100., 5000.), # Hz
-    filter_window_length = 500., # Hz
+    filter_window_length = 250., # Hz
     peak_prominence = 3., # dB
     peak_distance = 200. # Hz
 ):
