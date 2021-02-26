@@ -7,7 +7,7 @@ import gvar
 from aux import sample_gvar
 
 def _get_labels(Q):
-    return [f"$B_{{{i+1}}}$" for i in range(Q)] + [f"$F_{{{i+1}}}$" for i in range(Q)]
+    return [f"$B_{{{i+1}}}$" for i in range(Q)] + [f"$R_{{{i+1}}}$" for i in range(Q)]
 
 def show_dyplots(results, ylim_quantiles=(0,.99), trace_only=True):
     if trace_only is None: return
