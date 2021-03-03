@@ -1,7 +1,7 @@
 import numpy as np
 import band_bounds as bandwidths
 import freq_bounds as frequencies
-from product import product
+from aux import product
 import arctic
 
 P_max = 10

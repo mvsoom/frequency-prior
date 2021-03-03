@@ -1,5 +1,5 @@
 import numpy as np
-from product import product
+from aux import product
 import arctic
 
 P_max = 10
