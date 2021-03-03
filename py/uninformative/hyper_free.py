@@ -3,8 +3,8 @@ from product import product
 import arctic
 
 P_max = 10
-Q_max = 12
-resample_rate = 13000
+Q_max = 10
+resample_rate = 11000
 
 def get_data(file):
     global resample_rate
@@ -34,11 +34,11 @@ def get_hyperparameters():
     global Q_max
 
     bounds = {
-        'b': [(20.,)*Q_max, (500.,)*Q_max], # All bandwidths in [20, 500]
+        'b': [(10.,)*Q_max, (500.,)*Q_max], # All bandwidths in [20, 500]
         'f': None
     }
 
-    x0 = 200.
+    x0 = 150
     Ex = 500.*np.arange(1, Q_max+1)  # Schwa model
     F = [x0, *Ex]
     

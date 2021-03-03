@@ -35,20 +35,33 @@ vowels = list(
   `until` = "slt/arctic_b0041"
 )
 
+experiments = list(
+  `compare` = "hyper_cmp",
+  `free` = "hyper_free",
+  `free12` = "hyper_free12"
+)
+
 full = as.data.table(read.csv(file = "run_stats.csv",header = T))
 full[, vowel := file]
 levels(full$vowel) <- vowels
+full$hyperfile = as.factor(full$hyperfile)
+full[, experiment := hyperfile]
+levels(full$experiment) <- experiments
+full$experiment = ordered(full$experiment)
 full[, `:=`(new = new == "True")]
 full$P = ordered(full$P)
 full$Q = ordered(full$Q)
-full$hyperfile = as.factor(full$hyperfile)
 
-full_cmp = full[hyperfile == "hyper_cmp"]
-#full_free = full[hyperfile == "hyper_free"]
-full = NULL
+full_cmp = full[experiment == "compare"]
+full_free = full[experiment == "free"]
+full_free12 = full[experiment == "free12"]
 
-# p(new,P,Q|vowel)
-full_posterior_cmp = full_cmp[, .(new, P, Q,
-                              MAP = logz == max(logz),
-                              p = normalize(exp(-(max(logz) - logz)))),
-                              by=.(vowel)]
+# p(new,P,Q|hyper,vowel)
+full_posterior = full[, .(new, P, Q,
+                          MAP = logz == max(logz),
+                          p = normalize(exp(-(max(logz) - logz)))),
+                      by=.(experiment,vowel)]
+
+full_posterior_cmp = full_posterior[experiment == "compare"]
+full_posterior_free = full_posterior[experiment == "free"]
+full_posterior_free12 = full_posterior[experiment == "free12"]

@@ -14,7 +14,7 @@
 #     name: python3
 # ---
 
-# # Post analysis of comparison of old and new uninformative prior
+# # Post analysis of **comparison** of old and new uninformative prior
 #
 # Cases are ordered in terms of niceness; the nicest examples are first.
 #
