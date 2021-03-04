@@ -38,12 +38,24 @@ def sample_x(J, x0, Ex, size=1, u=None):
     
     return x if size > 1 else x[:,0] # (J, size)
 
-x0 = 200
-Ex = (500, 1000, 1500, 2000)
+num = 1000000
+J = 3
 
-samples = sample_x(4, x0, Ex, size=1000000)
+x0 = 200
+Ex = 500*(1 + arange(J))
+print(Ex)
+
+samples = sample_x(J, x0, Ex, size=num)
 mean(samples, axis=1)
 # -
+
+# The result of imposing an upper bound on the `x` is a relatively large shift in the means away from the given values (constraints), despite the high acceptance ratio. The heavy tails of the pdfs for the frequency ratios manifest themselves.
+
+fs = 11000
+keep = all(samples < fs/2, axis=0)
+print(f"Acceptance rate at fs = {fs}:", sum(keep)/num)
+accept = samples[:,keep]
+mean(accept, axis=1)
 
 U = 3000
 B = 50
