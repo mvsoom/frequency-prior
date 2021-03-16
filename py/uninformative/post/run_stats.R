@@ -1,4 +1,4 @@
-setwd("~/WRK/proj/formant-prior/research/py/uninformative/post/")
+setwd("/home/marnix/WRK/proj/vtr-prior/research/py/uninformative/post")
 
 library(data.table)
 library(ggplot2)
@@ -49,6 +49,7 @@ full[, experiment := hyperfile]
 levels(full$experiment) <- experiments
 full$experiment = ordered(full$experiment)
 full[, `:=`(new = new == "True")]
+full$ndim = 2*full$Q
 full$P = ordered(full$P)
 full$Q = ordered(full$Q)
 
