@@ -14,3 +14,8 @@ Two major speedups can be achieved in the likelihood functions.
 - Applying analytical results and simplifications developed in @Bretthorst1988
   (though at first sight the trend function could make this problematic) to
   derive sufficient statistics of the data based on the DFT
+
+- Making use of the fact that this model is a "nested one" [@vonderLinden2014, p. 472]
+  to compute the evidence. See [@vonderLinden2014, Section 27.2] for more approximation
+  that apply in marginalizing out background signals and a better prior for the
+  amplitudes.
