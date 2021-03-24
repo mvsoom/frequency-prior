@@ -21,7 +21,7 @@ def get_data(file):
 def get_grid():
     global P_max, Q_max
 
-    new = (True,)
+    new = (False,True)
     Ps = range(0, P_max+1)
     Qs = range(1, Q_max+1)
 
@@ -31,14 +31,16 @@ def get_grid():
 def get_hyperparameters():
     # Note that the model clips all frequencies >= fs/2, so we do not
     # have to take that into account in the frequency bounds.
-    global Q_max
+    global resample_rate, Q_max
+    
+    x0 = 150
+    xmax = resample_rate/2
 
     bounds = {
-        'b': [(10.,)*Q_max, (500.,)*Q_max], # All bandwidths in [20, 500]
-        'f': None
+        'b': [(10.,)*Q_max, (500.,)*Q_max], # All bandwidths in the same range
+        'f': [(x0,)*Q_max, (xmax,)*Q_max]   # All frequencies in the same range
     }
 
-    x0 = 150
     Ex = 500.*np.arange(1, Q_max+1)  # Schwa model
     F = [x0, *Ex]
     
