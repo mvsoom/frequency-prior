@@ -1,4 +1,4 @@
-setwd("/home/marnix/WRK/proj/vtr-prior/research/py/uninformative/post")
+setwd("/home/marnix/WRK/proj/paretochain/research/py/uninformative/post")
 
 library(data.table)
 library(ggplot2)

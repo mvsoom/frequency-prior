@@ -55,3 +55,4 @@ ggplot(
   geom_col(aes(P, p)) +
   facet_wrap(~vowel) +
   ggtitle("p(P | new=True, Q=5, vowel)")
+
