@@ -104,7 +104,16 @@ ggplot(diff, aes(d_logz, d_information)) +
   scale_size_continuous(range=c(2,10)) +
   ggtitle("The information between old and new priors for given (P,Q) is typically comparable")
 
-# Compare the amount of iterations needed to satisfy convergence
+ggplot(rel_diff, aes(r_logz, r_information)) +
+  geom_point(aes(size=prob, fill=vowel, shape=vowel)) +
+  geom_density2d() +
+  scale_color_brewer(type="qual") +
+  scale_alpha(range=c(.1,1)) +
+  scale_size_continuous(range=c(2,10)) +
+  coord_cartesian(xlim=c(-1,10)) +
+  ggtitle("Relative version of: The information between old and new priors for given (P,Q) is typically comparable")
+
+sudo# Compare the amount of iterations needed to satisfy convergence
 # criterion. Conclusions: number of iterations comparable,
 # consistent with the fact that the information is comparable
 summary(rel_diff[, .(r_niter_per_dim, r_walltime_per_dim)])
