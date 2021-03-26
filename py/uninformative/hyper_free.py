@@ -21,7 +21,7 @@ def get_data(file):
 def get_grid():
     global P_max, Q_max
 
-    new = (False,True)
+    new = (True,)
     Ps = range(0, P_max+1)
     Qs = range(1, Q_max+1)
 
