@@ -26,7 +26,7 @@ def show_dyplots(results, ylim_quantiles=(0,.99), trace_only=True):
     p.tight_layout()
     p.show()
 
-    if not trace_only: dyplot.cornerplot(results)
+    if not trace_only: dyplot.cornerplot(results, labels = _get_labels(Q))
 
 def show_modelplots(
     data,
