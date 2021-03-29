@@ -98,9 +98,9 @@ for x in samples.T:
 
 # +
 import model
+import hyper_cmp
 
-# %run driver.ipy
-hyper = get_hyperparameters()
+hyper = hyper_cmp.get_hyperparameters()
 print(hyper)
 # -
 
