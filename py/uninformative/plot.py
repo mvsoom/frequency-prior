@@ -312,12 +312,12 @@ def show_residuals(a, n=5):
     for i in range(n): plt.plot(i+np.random.randn(len(d))/n)
     plt.show()
 
-def plot_cornerplot(x, y, smooth=0.02, span=None, weights=None, levels=None,
+def plot_frequency_cornerplot(x, y, smooth=0.02, span=None, weights=None, levels=None,
             ax=None, color='gray', plot_datapoints=False, plot_density=True,
             plot_contours=True, no_fill_contours=False, fill_contours=True,
             contour_kwargs=None, contourf_kwargs=None, data_kwargs=None,
             impose_ordering=False, **kwargs):
-    """Adapted version of dyplot._hist2d()"""
+    """Specialized version dyplot._hist2d() suitable for frequencies"""
     
     # Repeat imports necessary for dyplot._hist2d()
     import types
