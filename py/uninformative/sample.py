@@ -14,6 +14,10 @@
 # ---
 
 # # Testing the samplers
+#
+# ---
+#
+# **Update:** See `paretochain.py` for an implementation that uses the notation from the paper. It also has a rejection sampler to sample from a Pareto chain upper bounded by a given $x_\max$.
 
 # ## Sample from $p(\boldsymbol x|\boldsymbol F)$
 
