@@ -58,6 +58,12 @@ rel_diff = rel_diff[PQ_posterior]
 # - Decreases in niter and walltime
 #
 # Compare to `MAP_diff` below.
+#
+# Our new prior requires < 5% extra iterations per dimension, compared
+# to the weakly informative (i.e. overlapping intervals) Jeffreys prior.
+# This is acceptable because with the new prior we don't need these
+# intervals, we can just use it off the shelf with any reasonable
+# value of \bar{x_0}
 
 # ABSOLUTE
 diff[,lapply(.SD,weighted.mean,w=prob), .SDcols=c("d_logl", "d_logz", "d_information", "d_niter_per_dim", "d_walltime_per_dim")]
@@ -72,6 +78,10 @@ rel_diff[,lapply(.SD,weighted.mean,w=prob), .SDcols=c("r_logl", "r_logz", "r_inf
 diff[,lapply(.SD,mean), .SDcols=c("d_logl", "d_logz", "d_information", "d_niter_per_dim", "d_walltime_per_dim")]
 
 rel_diff[,lapply(.SD,mean), .SDcols=c("r_logl", "r_logz", "r_information", "r_niter_per_dim", "r_walltime_per_dim")]
+
+diff[,lapply(.SD,median), .SDcols=c("d_logl", "d_logz", "d_information", "d_niter_per_dim", "d_walltime_per_dim")]
+
+rel_diff[,lapply(.SD,median), .SDcols=c("r_logl", "r_logz", "r_information", "r_niter_per_dim", "r_walltime_per_dim")]
 
 ######################################################
 # Comparing models at same (P,Q) for new=F and new=T #
@@ -113,7 +123,7 @@ ggplot(rel_diff, aes(r_logz, r_information)) +
   coord_cartesian(xlim=c(-1,10)) +
   ggtitle("Relative version of: The information between old and new priors for given (P,Q) is typically comparable")
 
-sudo# Compare the amount of iterations needed to satisfy convergence
+# Compare the amount of iterations needed to satisfy convergence
 # criterion. Conclusions: number of iterations comparable,
 # consistent with the fact that the information is comparable
 summary(rel_diff[, .(r_niter_per_dim, r_walltime_per_dim)])
@@ -219,7 +229,7 @@ MAP_rel
 #   posterior using the MAP models is also higher with the new prior
 #   (but note both posterior and prior change depending on the model).
 #   Thus the new prior favours models with posteriors for which it
-#   is more uninformative.
+#   is more uninformative.  
 #
 # Current hypothesis:
 # The new prior allowed the model to place VTRs essentially where-ever

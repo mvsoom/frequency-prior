@@ -9,6 +9,7 @@ theme_update(panel.grid.minor.x = element_blank())
 pct = function(x) round(x*100)
 pct_text = function(x) sprintf("%d﹪", pct(x))
 normalize = function(x) x/sum(x)
+logsum = function(lx) max(lx) + log(sum(exp(lx - max(lx))))
 
 # The phoneme is always the first vowel in the example word, e.g.
 # shOre instead of shorE for the first element.
