@@ -1,0 +1,51 @@
+import numpy as np
+np.random.seed(1992)
+from pylab import *
+from numpy import *
+
+# https://matplotlib.org/stable/gallery/userdemo/pgf_preamble_sgskip.html
+
+##########################################################################
+# Note: %matplotlib inline will throw errors if Latex commands requiring #
+# packages loaded in the preamble are used!                              #
+# This is the case for TEX_JEFFREYS and TEX_PC.                          #
+##########################################################################
+
+import matplotlib as mpl
+mpl.use('pgf')
+from matplotlib import pyplot as plt
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "text.usetex": False,
+    "pgf.rcfonts": False,    # don't setup fonts from rc parameters
+    "pgf.preamble": "\n".join([
+        r"\usepackage{bm}",
+    ])
+})
+
+# Extra settings
+plt.rcParams.update({
+    'xtick.labelsize':'x-small',
+    'ytick.labelsize':'x-small'
+})
+
+# Common plot settings
+TEXTWIDTH = 7.26913 # For wide figures
+
+COLOR_JEFFREYS = 'C0'
+COLOR_JEFFREYS2 = 'C0'
+COLOR_PC = 'C1'
+
+ORDERED_ZONE_ALPHA = 1/15
+
+#TEX_JEFFREYS = r"$\mathsf{Jeffreys}({\bm a},{\bm b})$"
+#TEX_JEFFREYS2 = r"$\mathsf{Jeffreys}(x_0, x_{\max})$"
+#TEX_PC = r"$\mathsf{ParetoChain}(\overline{\bm{x_0}})$"
+
+# Set working directory
+import os
+PLOTDIR = os.getcwd()
+os.chdir("../py/uninformative")
+
+def save_plot(fig, name):
+    return fig.savefig(PLOTDIR + '/' + name)
