@@ -16,7 +16,7 @@ Sampling of &pi;<sub>3</sub> is illustrated in `sample.ipynb`.
 
 ## Source code
 
-`paretochain.py` contains code to sample from &pi;<sub>1</sub> (which is the
+`paretochain.py` contains code to sample from &pi;<sub>3</sub> (which is the
 "Pareto chain prior").
 
 ## `./post` folder
