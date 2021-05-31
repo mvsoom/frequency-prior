@@ -6,8 +6,8 @@ This repo contains the full code used for Experiments I and II in Section 5.
 
 Details of the Experiments:
 
-    - `post_cmp.ipynb`: Experiment I
-    - `post_free.ipynb`: Experiment II
+  - `post_cmp.ipynb`: Experiment I
+  - `post_free.ipynb`: Experiment II
 
 The five waveforms used for the Experiments are visualized in
 `show_data.ipynb`. The data itself is contained in `./arctic`.
