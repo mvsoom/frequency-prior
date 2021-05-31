@@ -1,7 +1,3 @@
-paper/
-old/
 .ipynb_checkpoints/
 __pycache__/
 .Rhistory
-*.ipynb
-*.pdf
