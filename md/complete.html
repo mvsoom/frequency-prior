@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Obtaining complete posterior samples</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/home/marnix/.pandoc/styles/github.css" />
+  <script src="/usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+  
+  <!-- pandoc-eqnos: equation style -->
+  <style>
+    .eqnos { display: inline-block; position: relative; width: 100%; }
+    .eqnos br { display: none; }
+    .eqnos-number { position: absolute; right: 0em; top: 50%; line-height: 0; }
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Obtaining complete posterior samples</h1>
+</header>
+<nav id="TOC">
+<ul>
+<li><a href="#decomposition-of-the-posterior">Decomposition of the posterior</a></li>
+<li><a href="#sampling-sigma">Sampling <span class="math inline">\(\sigma\)</span></a></li>
+<li><a href="#sampling-b_i">Sampling <span class="math inline">\(b_i\)</span></a></li>
+<li><a href="#bibliography">References</a></li>
+</ul>
+</nav>
+<p>This document details how to obtain complete posterior samples <span class="math inline">\((b,\theta,\sigma)\)</span> given the nested sampling samples and weights of <span class="math inline">\(\theta\)</span>.</p>
+<p>We use notation and equations from <span class="citation" data-cites="VanSoom2020">Van Soom and de Boer (<a href="#ref-VanSoom2020">2020</a>)</span> but vectors are not in boldface. <span class="math inline">\(D\)</span> stands for all data <span class="math inline">\(d_{1:n}\)</span>. We use the shorthand <span class="math inline">\(b\)</span> for all <span class="math inline">\(b_{1:n}\)</span> (which is a set of vectors <span class="math inline">\(b_i\)</span>).</p>
+<h1 id="decomposition-of-the-posterior">Decomposition of the posterior</h1>
+<p>Denote the acquired nested sampling samples as <span class="math inline">\(\theta_{1:J}\)</span> with estimated weights <span class="math inline">\(w_{1:J}^{(\theta)}\)</span>.</p>
+<p>To get a <em>complete</em> posterior sample <span class="math inline">\((b,\theta,\sigma)\)</span> from <span class="math inline">\(p(b,\theta,\sigma|D)\)</span> for a sample <span class="math inline">\(\theta \in \theta_{1:J}\)</span> with weight <span class="math inline">\(w^{(\theta)}\)</span>, we first sample <span class="math inline">\(\sigma\)</span> from <span class="math inline">\(p(\sigma|\theta,D)\)</span> and then sample <span class="math inline">\(b_i\)</span> from <span class="math inline">\(p(b_i|\sigma,\theta,D)\)</span>. This is based on the decomposition</p>
+<p><span class="math display">\[ p(b,\theta,\sigma) = p(\theta|D) \times p(\sigma|\theta,D) \times
+p(b|\theta,\sigma,D). \]</span></p>
+<p>This decomposition also tells us the weight <span class="math inline">\(w^{(b,\theta,\sigma)}\)</span> to assign to the newly acquired sample <span class="math inline">\((b,\theta,\sigma)\)</span>:</p>
+<p><span class="math display">\[ w^{(b,\theta,\sigma)} = w^{(\theta)} \times p(\sigma|\theta,D) \times
+p(b|\theta,\sigma,D). \]</span></p>
+<p>Note: though nested sampling can estimate the actual posterior density at a given point (because of the knowledge of <span class="math inline">\(Z\)</span>), in practice we renormalize the importance weights as we use them to calculate weighted statistics. Thus in the code the log weights are defined up to addition of a constant.</p>
+<h1 id="sampling-sigma">Sampling <span class="math inline">\(\sigma\)</span></h1>
+<p><span class="math display">\[ p(\sigma|\theta,D) = \frac{p(\theta,\sigma|D)}{p(\theta|D)} \propto p(\sigma) p(D|\theta,\sigma) \]</span></p>
+<p>Given that</p>
+<p><span class="math display">\[ Z(P,Q) \equiv \int d\theta p(\theta) \int d\sigma p(\sigma) p(D|\theta,\sigma), \]</span></p>
+<p>the expression for <span class="math inline">\(p(D|\theta,\sigma)\)</span> can be gathered from Eq. (19) by identification. This yields</p>
+<p><span class="math display">\[ p(\sigma|\theta,D) \propto \sigma^{-1} (\sigma^2)^{\frac{nm-N}{2}}
+\exp{-\sum_i \chi_i^2/2\sigma^2}. \]</span></p>
+<p>This can be transformed into an inverse gamma distribution by the transformation</p>
+<p><span class="math display">\[ z = \sigma^2 \]</span></p>
+<p>such that (using <a href="https://en.wikipedia.org/wiki/Inverse-gamma_distribution">Wikipedia’s convention</a>)</p>
+<p><span class="math display">\[ z \sim \text{Inv-Gamma}(\alpha,\beta) \]</span></p>
+<p>where <span class="math inline">\(\alpha = (N-nm)/2\)</span> and <span class="math inline">\(\beta = \sum_i \chi_i^2/2\)</span>.</p>
+<h1 id="sampling-b_i">Sampling <span class="math inline">\(b_i\)</span></h1>
+<p>Let <span class="math inline">\(b = b_{1:n}\)</span>.</p>
+<p><span class="math display">\[ p(b|\theta,\sigma,D) = \frac{p(b,\theta,\sigma|D)}{p(\theta,\sigma|D)}
+\propto p(b,\theta,\sigma|D)\]</span></p>
+<p>This is just the posterior, so from Eq. (16),</p>
+<p><span class="math display">\[ p(b|\theta,\sigma,D) \propto \prod_i \exp{-Q_F^{(i)}/2} \]</span></p>
+<p>Using the approximation in Eq. (18), we have finally</p>
+<p><span class="math display">\[ p(b_i|\theta,\sigma,D) \propto \exp{-\frac{1}{2\sigma^2} (b_i - \hat{b_i})^T g_i (b_i - \hat{b_i})} \]</span></p>
+<p>or</p>
+<p><span id="eq:b" class="eqnos"><span class="math display">\[ b_i \sim \text{Multivariate-Normal}(\hat{b_i}, \sigma^2 g_i^{-1}) \]</span><span class="eqnos-number">(1)</span></span> </p>
+<p>Note that because of the approximation (18) this distribution is independent of the prior <span class="math inline">\(p(b)\)</span> used; it only plays a role in the likelihood function.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> In addition, note that we do not need to calculate <span class="math inline">\(g_i^{-1}\)</span> to sample from <a href="#eq:b">(1)</a>: see for example <a href="https://stackoverflow.com/a/16708868/6783015">here</a>.</p>
+<h1 id="bibliography" class="unnumbered">References</h1>
+<div id="refs" class="references">
+<div id="ref-VanSoom2020">
+<p>Van Soom, Marnix, and Bart de Boer. 2020. “Detrending the Waveforms of Steady-State Vowels.” <em>Entropy</em> 22 (3): 331. <a href="https://doi.org/10.3390/e22030331">https://doi.org/10.3390/e22030331</a>.</p>
+</div>
+</div>
+<section class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Come to think of it, couldn’t we integrate out <span class="math inline">\(\delta\)</span> in the same way as <span class="math inline">\(\sigma\)</span>?<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</section>
+</body>
+</html>
