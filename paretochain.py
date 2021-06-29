@@ -7,16 +7,16 @@ def sample(x0, xbar, size=1):
 
     # Calculate scale parameters for the u ~ Exp(beta)
     beta = [(X[k+1] - X[k])/X[k+1] for k in range(K)]
-    
+
     # Draw the u
     u = scipy.stats.expon.rvs(scale=beta, size=(size,K))
     
     # Transform to x
-    x = np.vstack([x0*np.exp(np.sum(u[:,0:k+1], axis=1)) for k in range(K)])
+    x = x0*np.exp(np.cumsum(u, axis=1))
     
-    return x.T # (size, K)
+    return x # (size, K)
 
-def sample_reject(x0, xbar, xmax, size=1):
+def sample_truncated(x0, xbar, xmax, size=1):
     def get_batch(size):
         x = sample(x0, xbar, size)
         keep = np.all(x <= xmax, axis=1)
